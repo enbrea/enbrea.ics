@@ -1,0 +1,97 @@
+pool:
+  vmImage: 'windows-2022'
+
+variables:
+- group: 'nuget-package-config'
+- group: 'github-config'
+
+steps:
+- checkout: self
+  persistCredentials: true
+- task: PowerShell@2
+  displayName: 'Get Version Number'
+  inputs:
+    filePath: 'azure-gitversion.ps1'
+    failOnStderr: true
+- task: Assembly-Info-NetCore@2
+  displayName: 'Apply Assembly Infos'
+  inputs:
+    Path: '$(Build.SourcesDirectory)'
+    FileNames: '**/*.csproj'
+    InsertAttributes: true
+    FileEncoding: 'auto'
+    WriteBOM: false
+    VersionNumber: '$(MajorVersion).$(MinorVersion).$(PatchVersion).$(Build.BuildId)'
+    FileVersionNumber: '$(MajorVersion).$(MinorVersion).$(PatchVersion).$(Build.BuildId)'
+    InformationalVersion: '$(SemVersion)'
+    LogLevel: 'verbose'
+    FailOnWarning: false
+- task: NuGetToolInstaller@1
+  displayName: 'Install NuGet Client'
+  inputs:
+    versionSpec: '6.x'
+- task: DotNetCoreCLI@2
+  displayName: 'Restore'
+  inputs:
+    command: 'restore'
+    projects: '*.sln'
+    feedsToUse: 'select'
+    vstsFeed: 'b0890edd-bcca-4a1c-b63c-d22daf6e4407/24f47e68-5eca-4ba8-8ab3-905662347d75'
+- task: DotNetCoreCLI@2
+  displayName: 'Build'
+  inputs:
+    command: 'build'
+    projects: '*.sln'
+    arguments: '-c $(BuildConfiguration)'
+- task: DotNetCoreCLI@2
+  displayName: 'Test'
+  inputs:
+    command: 'test'
+    projects: '*.sln'
+    arguments: '-c $(BuildConfiguration)'
+    testRunTitle: 'Perform unit tests'
+- task: DotNetCoreCLI@2
+  displayName: 'Pack'
+  inputs:
+    command: 'custom'
+    projects: 'src/Enbrea.Ics.csproj'
+    custom: 'pack'
+    arguments: '/p:Configuration=$(BuildConfiguration) /p:PackageVersion=$(SemVersion) --no-build'
+- task: DownloadSecureFile@1
+  displayName: 'Download Code Signing certificate'
+  name: Certificate
+  inputs:
+    secureFile: cert.pfx
+- task: NuGetCommand@2
+  displayName: 'Sign'
+  inputs:
+    command: 'custom'
+    arguments: 'sign $(Build.Repository.LocalPath)/**/*.nupkg -CertificatePath $(Certificate.secureFilePath) -CertificatePassword $(CertificatePassword) -Timestamper http://timestamp.digicert.com'
+- task: NuGetCommand@2
+  displayName: 'Publish preview to internal feed'
+  condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'))
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.Repository.LocalPath)/**/*.nupkg;!$(Build.Repository.LocalPath)/**/*.symbols.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: 'b0890edd-bcca-4a1c-b63c-d22daf6e4407/24f47e68-5eca-4ba8-8ab3-905662347d75'
+- task: PowerShell@2
+  displayName: 'Push to GitHub'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  inputs:
+    targetType: 'inline'
+    script: |
+      git remote add github https://$(PAT)@github.com/enbrea/enbrea.ics.git
+      git fetch github
+      git checkout .
+      git push github HEAD:main
+      git push --tags github HEAD:main
+    pwsh: true
+- task: NuGetCommand@2
+  displayName: 'Publish to nuget.org'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.Repository.LocalPath)/**/*.nupkg;!$(Build.Repository.LocalPath)/**/*.symbols.nupkg'
+    nuGetFeedType: 'external'
+    publishFeedCredentials: 'STUEBER SYSTEMS | nuget.org'

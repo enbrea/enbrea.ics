@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net6.0</TargetFrameworks>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<Authors>STÜBER SYSTEMS GmbH</Authors>
+		<Company>STÜBER SYSTEMS GmbH</Company>
+		<Copyright>© 2022 STÜBER SYSTEMS GmbH</Copyright>
+		<Product>ENBREA ICS</Product>
+		<Description>High performance iCalendar Reader and Writer classes for .NET</Description>
+		<PackageLicenseUrl></PackageLicenseUrl>
+		<RepositoryType>git</RepositoryType>
+		<NeutralLanguage></NeutralLanguage>
+		<Version>0.0.1</Version>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/enbrea/enbrea.ics</RepositoryUrl>
+		<PackageTags>enbrea;ics;ical;parser;reader;writer</PackageTags>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
+
+</Project>
