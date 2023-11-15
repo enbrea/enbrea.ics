@@ -5,7 +5,7 @@
 
 A .NET library for parsing and building [iCalendar](https://tools.ietf.org/html/rfc5545) streams and files:
 
-+ Supports .NET 6
++ Supports .NET 6, .NET 7 and .NET 8
 + Supports reading and writing of the following iCal components:
   + VCALENDAR
   + VEVENT

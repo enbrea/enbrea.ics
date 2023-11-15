@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0</TargetFrameworks>
+		<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<Authors>STÜBER SYSTEMS GmbH</Authors>
 		<Company>STÜBER SYSTEMS GmbH</Company>
-		<Copyright>© 2022 STÜBER SYSTEMS GmbH</Copyright>
+		<Copyright>© 2023 STÜBER SYSTEMS GmbH</Copyright>
 		<Product>ENBREA ICS</Product>
-		<Description>High performance iCalendar Reader and Writer classes for .NET</Description>
+		<Description>A .NET library for parsing and building iCal (RFC 5545) streams and files</Description>
 		<PackageLicenseUrl></PackageLicenseUrl>
 		<RepositoryType>git</RepositoryType>
 		<NeutralLanguage></NeutralLanguage>
