@@ -2,12 +2,32 @@ pool:
   vmImage: 'windows-2022'
 
 variables:
+- group: 'code-sign-config'
 - group: 'nuget-package-config'
 - group: 'github-config'
 
 steps:
 - checkout: self
   persistCredentials: true
+- task: DownloadSecureFile@1
+  displayName: 'Download Client Authentication Certificate'
+  name: SM_CLIENT_CERT_FILE
+  inputs:
+    secureFile: ClientCert.p12
+- task: SSMClientToolsSetup@1
+  displayName: 'Setup DigiCert Tools'
+  inputs:
+    APIKey: '$(SM_API_KEY)'
+- task: PowerShell@2
+  displayName: 'Prepare DigiCert Code Signing'
+  inputs:
+    targetType: 'inline'
+    script: |
+      $env:PATH += ';C:\Program Files\DigiCert\DigiCert Keylocker Tools'
+      smctl credentials save $(SM_API_KEY) $(SM_CLIENT_CERT_PASSWORD)
+      smksp_cert_sync.exe
+    failOnStderr: true
+    pwsh: true
 - task: PowerShell@2
   displayName: 'Get Version Number'
   inputs:
@@ -26,10 +46,6 @@ steps:
     InformationalVersion: '$(SemVersion)'
     LogLevel: 'verbose'
     FailOnWarning: false
-- task: NuGetToolInstaller@1
-  displayName: 'Install NuGet Client'
-  inputs:
-    versionSpec: '6.x'
 - task: DotNetCoreCLI@2
   displayName: 'Restore'
   inputs:
@@ -57,16 +73,13 @@ steps:
     projects: 'src/Enbrea.Ics.csproj'
     custom: 'pack'
     arguments: '/p:Configuration=$(BuildConfiguration) /p:PackageVersion=$(SemVersion) --no-build'
-- task: DownloadSecureFile@1
-  displayName: 'Download Code Signing certificate'
-  name: Certificate
-  inputs:
-    secureFile: cert.pfx
 - task: NuGetCommand@2
   displayName: 'Sign'
+  env:
+    SM_CLIENT_CERT_FILE : $(SM_CLIENT_CERT_FILE.secureFilePath)
   inputs:
     command: 'custom'
-    arguments: 'sign $(Build.Repository.LocalPath)/**/*.nupkg -CertificatePath $(Certificate.secureFilePath) -CertificatePassword $(CertificatePassword) -Timestamper http://timestamp.digicert.com'
+    arguments: 'sign $(Build.Repository.LocalPath)/**/*.nupkg -Timestamper http://timestamp.digicert.com -CertificateFingerprint $(SM_CERT_FINGERPRINT) -HashAlgorithm SHA256 -Verbosity detailed -Overwrite'
 - task: NuGetCommand@2
   displayName: 'Publish preview to internal feed'
   condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'))

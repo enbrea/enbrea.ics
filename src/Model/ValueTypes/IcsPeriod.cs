@@ -1,8 +1,8 @@
-﻿#region enbrea.ics copyright (c) 2022 stüber systems gmbh
+﻿#region enbrea.ics Copyright (C) 2023 STÜBER SYSTEMS GmbH
 /*    
  *    enbrea.ics 
  *    
- *    copyright (c) 2022 stüber systems gmbh
+ *    Copyright (C) 2023 STÜBER SYSTEMS GmbH
  *
  *    licensed under the mit license, version 2.0. 
  * 
