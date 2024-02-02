@@ -1,10 +1,10 @@
-﻿#region enbrea.ics Copyright (C) 2023 STÜBER SYSTEMS GmbH
+﻿#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
 /*    
- *    enbrea.ics 
+ *    ENBREA.ICS 
  *    
- *    Copyright (C) 2023 STÜBER SYSTEMS GmbH
+ *    Copyright (C) STÜBER SYSTEMS GmbH
  *
- *    licensed under the mit license, version 2.0. 
+ *    Licensed under the MIT License, Version 2.0. 
  * 
  */
 #endregion

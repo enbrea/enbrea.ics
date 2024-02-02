@@ -1,8 +1,8 @@
-﻿#region ENBREA.ICS - Copyright (C) 2023 STÜBER SYSTEMS GmbH
+﻿#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
 /*    
  *    ENBREA.ICS 
  *    
- *    Copyright (C) 2023 STÜBER SYSTEMS GmbH
+ *    Copyright (C) STÜBER SYSTEMS GmbH
  *
  *    Licensed under the MIT License, Version 2.0. 
  * 
@@ -59,16 +59,16 @@ namespace Enbrea.Ics
         public string Name { get; set; }
 
         /// <summary>
-        /// Defines the vakue of the content line.
+        /// Defines the value of the content line.
         /// </summary>
         public string Value { get; set; }
 
         /// <summary>
-        /// 
+        /// A static function that converts a name/value pair into a content line.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
+        /// <param name="name">Name of the content line</param>
+        /// <param name="value">Value of the content line</param>
+        /// <returns>The resulting content line</returns>
         public static string ToString(string name, string value)
         {
             var line = new IcsContentLine(name, value);
