@@ -47,7 +47,7 @@ namespace Enbrea.Ics.Tests
             Assert.Equal("http://www.meetup.com/events/ical/8333638/dfdba2e4692160753404f737feace78d526ff0ce/going", enumerator.Current.CustomProperties[0].Value);
 
             // Number of events
-            Assert.Equal(1, enumerator.Current.EventList.Count);
+            Assert.Single(enumerator.Current.EventList);
 
             // Event properties
             Assert.NotNull(enumerator.Current.EventList[0].Uid);
@@ -63,8 +63,8 @@ namespace Enbrea.Ics.Tests
                 "Details: http://www.meetup.com/Phoenix-Drupal-User-Group/events/33627272/", enumerator.Current.EventList[0].Description.Value);
 
             // Number of timezones
-            Assert.Equal(1, enumerator.Current.TimeZoneList.Count);
-            Assert.Equal(1, enumerator.Current.TimeZoneList[0].StandardRuleList.Count);
+            Assert.Single(enumerator.Current.TimeZoneList);
+            Assert.Single(enumerator.Current.TimeZoneList[0].StandardRuleList);
 
             // timezone properties
             Assert.Equal("America/Phoenix", enumerator.Current.TimeZoneList[0].Id.Value);
@@ -93,7 +93,7 @@ namespace Enbrea.Ics.Tests
             Assert.Equal("-//Notando//NONSGML DoReserve//EN", enumerator.Current.ProductId.Value);
 
             // Number of events
-            Assert.Equal(1, enumerator.Current.EventList.Count);
+            Assert.Single(enumerator.Current.EventList);
 
             // Event properties
             Assert.NotNull(enumerator.Current.EventList[0].Uid);
@@ -129,7 +129,7 @@ namespace Enbrea.Ics.Tests
             // Calendar properties
 
             // Number of events
-            Assert.Equal(1, enumerator.Current.EventList.Count);
+            Assert.Single(enumerator.Current.EventList);
 
             // 1. event 
             Assert.Equal("eb9e1bd2-ceba-499f-be77-f02773954c72", enumerator.Current.EventList[0].Uid.Value);
@@ -138,7 +138,7 @@ namespace Enbrea.Ics.Tests
             Assert.Equal("mailto:stomlinson@mozilla.com", enumerator.Current.EventList[0].Organizer.Value);
 
             // Alarm
-            Assert.Equal(1, enumerator.Current.EventList[0].AlarmList.Count);
+            Assert.Single(enumerator.Current.EventList[0].AlarmList);
             Assert.Equal(IcsActionValue.Display, enumerator.Current.EventList[0].AlarmList[0].Action.Value);
             Assert.Equal(new TimeSpan(0, -5, 0), enumerator.Current.EventList[0].AlarmList[0].Trigger.ValueAsTimeSpan);
             Assert.Equal(IcsTriggerRelationship.Start, enumerator.Current.EventList[0].AlarmList[0].Trigger.Relationship);
@@ -169,7 +169,7 @@ namespace Enbrea.Ics.Tests
             // 1. event 
             Assert.NotNull(enumerator.Current.EventList[0].Uid);
             Assert.Equal("Winterferien 2022 Berlin", enumerator.Current.EventList[0].Summary.Value);
-            Assert.Equal(1, enumerator.Current.EventList[0].CategoriesList.Count);
+            Assert.Single(enumerator.Current.EventList[0].CategoriesList);
             Assert.Equal(2, enumerator.Current.EventList[0].CategoriesList[0].Values.Length);
             Assert.Equal("Ferien", enumerator.Current.EventList[0].CategoriesList[0].Values[0]);
             Assert.Equal("Berlin", enumerator.Current.EventList[0].CategoriesList[0].Values[1]);
@@ -185,7 +185,7 @@ namespace Enbrea.Ics.Tests
             // 2. event 
             Assert.NotNull(enumerator.Current.EventList[1].Uid);
             Assert.Equal("Osterferien 2022 Berlin", enumerator.Current.EventList[1].Summary.Value);
-            Assert.Equal(1, enumerator.Current.EventList[1].CategoriesList.Count);
+            Assert.Single(enumerator.Current.EventList[1].CategoriesList);
             Assert.Equal(2, enumerator.Current.EventList[1].CategoriesList[0].Values.Length);
             Assert.Equal("Ferien", enumerator.Current.EventList[1].CategoriesList[0].Values[0]);
             Assert.Equal("Berlin", enumerator.Current.EventList[1].CategoriesList[0].Values[1]);
@@ -201,7 +201,7 @@ namespace Enbrea.Ics.Tests
             // Last event 
             Assert.NotNull(enumerator.Current.EventList[7].Uid);
             Assert.Equal("Weihnachtsferien 2022 Berlin", enumerator.Current.EventList[7].Summary.Value);
-            Assert.Equal(1, enumerator.Current.EventList[7].CategoriesList.Count);
+            Assert.Single(enumerator.Current.EventList[7].CategoriesList);
             Assert.Equal(2, enumerator.Current.EventList[7].CategoriesList[0].Values.Length);
             Assert.Equal("Ferien", enumerator.Current.EventList[7].CategoriesList[0].Values[0]);
             Assert.Equal("Berlin", enumerator.Current.EventList[7].CategoriesList[0].Values[1]);
