@@ -1,5 +1,5 @@
 pool:
-  vmImage: 'windows-2022'
+  vmImage: 'windows-latest'
 
 variables:
 - group: 'code-sign-config'
@@ -27,12 +27,14 @@ stages:
     - task: PowerShell@2
       displayName: 'Prepare DigiCert Code Signing'
       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+      env:
+        SM_CLIENT_CERT_FILE : $(SM_CLIENT_CERT_FILE.secureFilePath)
       inputs:
         targetType: 'inline'
         script: |
           $env:PATH += ';C:\Program Files\DigiCert\DigiCert Keylocker Tools'
           smctl credentials save $(SM_API_KEY) $(SM_CLIENT_CERT_PASSWORD)
-          smksp_cert_sync.exe
+          smctl windows certsync --keypair-alias=$(SM_KEYPAIR_ALIAS)
         failOnStderr: true
         pwsh: true
     - task: PowerShell@2
