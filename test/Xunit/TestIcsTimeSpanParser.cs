@@ -19,94 +19,32 @@ namespace Enbrea.Ics.Tests
     /// </summary>
     public class TestIcsTimeSpanParser
     {
-        [Fact]
-        public void SupportDateAndTime_1()
+        [Theory]
+        [InlineData("P15DT5H0M20S", 15, 5, 0, 20)]
+        [InlineData("P15DT5H4M", 15, 5, 4, 0)]
+        [InlineData("+P15DT5H", 15, 5, 0, 0)]
+        [InlineData("-P15DT5H0M20S", -15, -5, 0, -20)]
+        [InlineData("-PT5M", 0, 0, -5, 0)]
+        [InlineData("-P7W", -49, 0, 0, 0)]
+        [InlineData("P7W", 49, 0, 0, 0)]
+        [InlineData("P0D", 0, 0, 0, 0)]
+        [InlineData("P0W", 0, 0, 0, 0)]
+        public void SupportCommonCases(string input, int expectedDays, int expectedHours, int expectedMinutes, int expectedSeconds)
         {
-            var textLine = "P15DT5H0M20S";
+            var duration = IcsTimeSpanParser.Parse(input);
 
-            var ts = IcsTimeSpanParser.Parse(textLine);
-
-            Assert.Equal(new TimeSpan(15, 5, 0, 20), ts);
+            Assert.Equal(new TimeSpan(expectedDays, expectedHours, expectedMinutes, expectedSeconds), duration);
         }
 
-        [Fact]
-        public void SupportDateAndTime_2()
+        [Theory]
+        [InlineData("PT4.5S", 0, 0, 0, 4, 500)]
+        [InlineData("+PT4.25S", 0, 0, 0, 4, 250)]
+        [InlineData("-PT2.75S", 0, 0, 0, -2, -750)]
+        public void SupportFractionalSeconds(string input, int expectedDays, int expectedHours, int expectedMinutes, int expectedSeconds, int expectedMilliseconds)
         {
-            var textLine = "P15DT5H4M";
+            var duration = IcsTimeSpanParser.Parse(input);
 
-            var ts = IcsTimeSpanParser.Parse(textLine);
-
-            Assert.Equal(new TimeSpan(15, 5, 4, 0), ts);
-        }
-
-        [Fact]
-        public void SupportDateAndTime_3()
-        {
-            var textLine = "+P15DT5H";
-
-            var ts = IcsTimeSpanParser.Parse(textLine);
-
-            Assert.Equal(new TimeSpan(15, 5, 0, 0), ts);
-        }
-
-        [Fact]
-        public void SupportNegatedDateAndTime()
-        {
-            var textLine = "-P15DT5H0M20S";
-
-            var ts = IcsTimeSpanParser.Parse(textLine);
-
-            Assert.Equal(new TimeSpan(-15, -5, 0, -20), ts);
-        }
-
-        [Fact]
-        public void SupportNegatedHours()
-        {
-            var textLine = "-PT5M";
-
-            var ts = IcsTimeSpanParser.Parse(textLine);
-
-            Assert.Equal(new TimeSpan(0, -5, 0), ts);
-        }
-
-        [Fact]
-        public void SupportNegatedWeek()
-        {
-            var textLine = "-P7W";
-
-            var ts = IcsTimeSpanParser.Parse(textLine);
-
-            Assert.Equal(new TimeSpan(-49, 0, 0, 0), ts);
-        }
-
-        [Fact]
-        public void SupportWeek()
-        {
-            var textLine = "P7W";
-
-            var ts = IcsTimeSpanParser.Parse(textLine);
-
-            Assert.Equal(new TimeSpan(49, 0, 0, 0), ts);
-        }
-
-        [Fact]
-        public void SupportZero_1()
-        {
-            var textLine = "P0D";
-
-            var ts = IcsTimeSpanParser.Parse(textLine);
-
-            Assert.Equal(new TimeSpan(0), ts);
-        }
-
-        [Fact]
-        public void SupportZero_2()
-        {
-            var textLine = "P0W";
-
-            var ts = IcsTimeSpanParser.Parse(textLine);
-
-            Assert.Equal(new TimeSpan(0), ts);
+            Assert.Equal(new TimeSpan(expectedDays, expectedHours, expectedMinutes, expectedSeconds, expectedMilliseconds), duration);
         }
     }
 }
