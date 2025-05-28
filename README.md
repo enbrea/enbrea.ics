@@ -18,6 +18,7 @@ A .NET library for parsing and building [iCalendar](https://tools.ietf.org/html/
   + DAYLIGHT
 + Supports reading and writing of custom properties and parameters
 + Includes low level iCalendar content line parser
++ Includes low level iCalendar duration parser
 + Includes high level iCalendar object reader and writer 
 + Includes synchron and asynchron methods
 
