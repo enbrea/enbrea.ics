@@ -11,7 +11,7 @@
 		<PackageLicenseUrl></PackageLicenseUrl>
 		<RepositoryType>git</RepositoryType>
 		<NeutralLanguage></NeutralLanguage>
-		<Version>0.1.1</Version>
+		<Version>0.2.0</Version>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/enbrea/enbrea.ics</RepositoryUrl>
