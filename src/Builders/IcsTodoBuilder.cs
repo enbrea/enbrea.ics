@@ -15,8 +15,8 @@ namespace Enbrea.Ics
 {
     internal class IcsTodoBuilder : IcsComponentBuilder
     {
-        private IcsComponentBuilder _currentSubBuilder = null;
         private readonly IList<IcsTodo> _todoList;
+        private IcsComponentBuilder _currentSubBuilder = null;
         private IcsTodo _todo;
 
         public IcsTodoBuilder(IList<IcsTodo> todoList)

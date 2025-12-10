@@ -333,26 +333,6 @@ namespace Enbrea.Ics
         }
 
         /// <summary>
-        /// Is value type of UNTIL a DATE?
-        /// </summary>
-        /// <returns>TRUE, if value type is DATE</returns>
-        public bool IsDate()
-        {
-            var p = GetParameter(IcsParameterNames.Until);
-            return p != null && !p.Contains('T');
-        }
-
-        /// <summary>
-        /// Is value type of UNTIL a DATE-TIME?
-        /// </summary>
-        /// <returns>TRUE, if value type is DATE-TIME</returns>
-        public bool IsDateTime()
-        {
-            var p = GetParameter(IcsParameterNames.Until);
-            return p != null && p.Contains('T');
-        }
-
-        /// <summary>
         /// Removes a parameter from the content line
         /// </summary>
         /// <param name="name">The name of the parameter</param>
@@ -404,6 +384,26 @@ namespace Enbrea.Ics
             }
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Is value type of UNTIL a DATE?
+        /// </summary>
+        /// <returns>TRUE, if value type is DATE</returns>
+        public bool UntilIsDate()
+        {
+            var p = GetParameter(IcsParameterNames.Until);
+            return p != null && !p.Contains('T');
+        }
+
+        /// <summary>
+        /// Is value type of UNTIL a DATE-TIME?
+        /// </summary>
+        /// <returns>TRUE, if value type is DATE-TIME</returns>
+        public bool UntilIsDateTime()
+        {
+            var p = GetParameter(IcsParameterNames.Until);
+            return p != null && p.Contains('T');
         }
     }
 }

@@ -16,9 +16,9 @@ namespace Enbrea.Ics
 {
     internal abstract class IcsTimeZoneRuleBuilder<T> : IcsComponentBuilder where T: IcsTimeZoneRule
     {
+        private readonly string _componentName;
         private readonly IList<T> _timeZoneRuleList;
         private T _timeZoneRule;
-        private readonly string _componentName;
 
         public IcsTimeZoneRuleBuilder(string componentName, IList<T> timeZoneRuleList)
         {

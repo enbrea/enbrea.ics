@@ -41,8 +41,8 @@ namespace Enbrea.Ics.Tests
             Assert.Equal(IcsRecurrenceFrequency.Daily, rule.Frequency);
             Assert.Equal(new DateTime(1997, 12, 24, 0, 0, 0), rule.UntilAsDateTime);
             Assert.Equal(DateTimeKind.Utc, rule.UntilAsDateTime?.Kind);
-            Assert.True(rule.IsDateTime());
-            Assert.False(rule.IsDate());
+            Assert.True(rule.UntilIsDateTime());
+            Assert.False(rule.UntilIsDate());
             Assert.Equal(textLine, rule.ToString());
         }
 
@@ -82,8 +82,8 @@ namespace Enbrea.Ics.Tests
             Assert.Equal(3, rule.Interval);
             Assert.Equal(new DateTime(1997, 09, 02, 17, 0, 0), rule.UntilAsDateTime);
             Assert.Equal(DateTimeKind.Utc, rule.UntilAsDateTime?.Kind);
-            Assert.True(rule.IsDateTime());
-            Assert.False(rule.IsDate());
+            Assert.True(rule.UntilIsDateTime());
+            Assert.False(rule.UntilIsDate());
             Assert.Equal(textLine, rule.ToString());
         }
 
@@ -110,8 +110,8 @@ namespace Enbrea.Ics.Tests
             Assert.Equal(IcsRecurrenceFrequency.Minutely, rule.Frequency);
             Assert.Equal(90, rule.Interval);
             Assert.Equal(new DateOnly(1997, 09, 02), rule.UntilAsDate);
-            Assert.False(rule.IsDateTime());
-            Assert.True(rule.IsDate());
+            Assert.False(rule.UntilIsDateTime());
+            Assert.True(rule.UntilIsDate());
             Assert.Equal(textLine, rule.ToString());
         }
 
@@ -125,8 +125,8 @@ namespace Enbrea.Ics.Tests
             Assert.Equal(IcsRecurrenceFrequency.Monthly, rule.Frequency);
             Assert.Equal(new DateTime(1997, 12, 24, 0, 0, 0), rule.UntilAsDateTime);
             Assert.Equal(DateTimeKind.Utc, rule.UntilAsDateTime?.Kind);
-            Assert.True(rule.IsDateTime());
-            Assert.False(rule.IsDate());
+            Assert.True(rule.UntilIsDateTime());
+            Assert.False(rule.UntilIsDate());
             Assert.Equal(DayOfWeek.Friday, rule.ByDay[0].DayOfWeek);
             Assert.Equal((sbyte)1, rule.ByDay[0].Occurrence);
             Assert.Equal(textLine, rule.ToString());
@@ -217,8 +217,8 @@ namespace Enbrea.Ics.Tests
             Assert.Equal(IcsRecurrenceFrequency.Weekly, rule.Frequency);
             Assert.Equal(new DateTime(1997, 10, 07, 0, 0, 0), rule.UntilAsDateTime);
             Assert.Equal(DateTimeKind.Utc, rule.UntilAsDateTime?.Kind);
-            Assert.True(rule.IsDateTime());
-            Assert.False(rule.IsDate());
+            Assert.True(rule.UntilIsDateTime());
+            Assert.False(rule.UntilIsDate());
             Assert.Equal(DayOfWeek.Sunday, rule.WeekStart);
             Assert.Equal(DayOfWeek.Tuesday, rule.ByDay[0].DayOfWeek);
             Assert.Equal(DayOfWeek.Thursday, rule.ByDay[1].DayOfWeek);
@@ -235,8 +235,8 @@ namespace Enbrea.Ics.Tests
             Assert.Equal(IcsRecurrenceFrequency.Yearly, rule.Frequency);
             Assert.Equal(new DateTime(2000, 01, 31, 14, 0, 0), rule.UntilAsDateTime);
             Assert.Equal(DateTimeKind.Utc, rule.UntilAsDateTime?.Kind);
-            Assert.True(rule.IsDateTime());
-            Assert.False(rule.IsDate());
+            Assert.True(rule.UntilIsDateTime());
+            Assert.False(rule.UntilIsDate());
             Assert.Equal(1, rule.ByMonth[0]);
             Assert.Equal(DayOfWeek.Sunday, rule.ByDay[0].DayOfWeek);
             Assert.Equal(DayOfWeek.Monday, rule.ByDay[1].DayOfWeek);

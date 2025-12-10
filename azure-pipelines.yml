@@ -8,12 +8,39 @@ variables:
 
 stages:
 
-- stage: BuildAndTest  
+- stage: versioning
+  displayName: Get Version
   jobs:
-  - job: 
+  - job: get_version
+    displayName: Generate Version from Git tags
     steps:
     - checkout: self
-      persistCredentials: true
+      fetchTags: true
+      fetchDepth: 0
+    - task: PowerShell@2
+      displayName: 'Generate Semantic Version'
+      name: gitver
+      inputs:
+        filePath: 'azure-gitversion.ps1'
+        failOnStderr: true
+        pwsh: true
+
+- stage: build
+  displayName: Build Application
+  dependsOn: versioning
+  variables:
+    BuildConfiguration: 'release'
+    SemVersion: $[ stageDependencies.versioning.get_version.outputs['gitver.SemVersion'] ]
+    MajorVersion: $[ stageDependencies.versioning.get_version.outputs['gitver.MajorVersion'] ]
+    MinorVersion: $[ stageDependencies.versioning.get_version.outputs['gitver.MinorVersion'] ]
+    PatchVersion: $[ stageDependencies.versioning.get_version.outputs['gitver.PatchVersion'] ]  
+  jobs:  
+  - job: create_setups
+    displayName: Build, Publish and Sign
+    variables:
+      NUGET_PACKAGES: '$(Pipeline.Workspace)/.nuget/packages'
+    steps:
+    - checkout: self
     - task: DownloadSecureFile@1
       displayName: 'Download Client Authentication Certificate'
       name: SM_CLIENT_CERT_FILE
@@ -37,12 +64,6 @@ stages:
           smctl windows certsync --keypair-alias=$(SM_KEYPAIR_ALIAS)
         failOnStderr: true
         pwsh: true
-    - task: PowerShell@2
-      displayName: 'Get Version Number'
-      inputs:
-        filePath: 'azure-gitversion.ps1'
-        failOnStderr: true
-        pwsh: true
     - task: Assembly-Info-NetCore@3
       displayName: 'Apply Assembly Infos'
       inputs:
@@ -56,25 +77,32 @@ stages:
         InformationalVersion: '$(SemVersion)'
         LogLevel: 'verbose'
         FailOnWarning: false
+        DisableTelemetry: true
+    - task: Cache@2
+      displayName: 'Cache NuGet packages'
+      inputs:
+        key: 'nuget | "$(Agent.OS)" | **/*.csproj'
+        restoreKeys: 'nuget | "$(Agent.OS)"'
+        path: $(NUGET_PACKAGES)
     - task: DotNetCoreCLI@2
       displayName: 'Restore'
       inputs:
         command: 'restore'
-        projects: '*.sln'
+        projects: '*.slnx'
         feedsToUse: 'select'
         vstsFeed: 'b0890edd-bcca-4a1c-b63c-d22daf6e4407/24f47e68-5eca-4ba8-8ab3-905662347d75'
     - task: DotNetCoreCLI@2
       displayName: 'Build'
       inputs:
         command: 'build'
-        projects: '*.sln'
-        arguments: '-c $(BuildConfiguration)'
+        projects: '*.slnx'
+        arguments: '-c $(BuildConfiguration) --no-restore /p:ContinuousIntegrationBuild=true'
     - task: DotNetCoreCLI@2
       displayName: 'Test'
       inputs:
         command: 'test'
-        projects: '*.sln'
-        arguments: '-c $(BuildConfiguration)'
+        projects: '*.slnx'
+        arguments: '-c $(BuildConfiguration) --no-build'
         testRunTitle: 'Perform unit tests'
     - task: DotNetCoreCLI@2
       displayName: 'Pack'
@@ -82,6 +110,7 @@ stages:
         command: 'pack'
         packagesToPack: 'src/Enbrea.Ics.csproj'
         nobuild: true
+        arguments: '/p:ContinuousIntegrationBuild=true'
         versioningScheme: 'byEnvVar'
         versionEnvVar: 'SemVersion'
     - task: NuGetCommand@2
@@ -89,15 +118,76 @@ stages:
       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
       env:
         SM_CLIENT_CERT_FILE : $(SM_CLIENT_CERT_FILE.secureFilePath)
+        SM_HOST : $(SM_HOST)
       inputs:
         command: 'custom'
         arguments: 'sign $(Build.ArtifactStagingDirectory)/**/*.nupkg -Timestamper http://timestamp.digicert.com -CertificateFingerprint $(SM_CERT_FINGERPRINT) -HashAlgorithm SHA256 -Verbosity detailed -Overwrite'
     - publish: '$(Build.ArtifactStagingDirectory)'
       artifact: drop
       
-- stage: Deploy
+- stage: github
+  displayName: Publish Source
+  dependsOn: build
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   jobs:
-  - job: 
+  - job: push_to_github
+    displayName: Push Source to GitHub
+    steps:
+    - checkout: self
+      fetchTags: true
+      fetchDepth: 0
+    - task: PowerShell@2
+      displayName: 'Push to GitHub'
+      inputs:
+        targetType: 'inline'
+        pwsh: true
+        script: |
+
+          $ErrorActionPreference = 'Stop'
+
+          try {
+            
+            # Configure Git identity
+            git config user.name  'azure-devops-bot'
+            git config user.email 'azuredevops@stueber.nomail'
+
+            # Add 'github' remote
+            git remote add github https://$(PAT)@github.com/enbrea/enbrea.ics.git
+
+            # Fetch remote main if it exists (ok to fail if repo is empty)
+            git fetch --prune github main
+            $fetchCode = $LASTEXITCODE
+
+            # If remote branch exists, only push when remote is an ancestor of HEAD (fast-forward safe)
+            if ($fetchCode -eq 0) {
+              git merge-base --is-ancestor github/main HEAD
+              if ($LASTEXITCODE -ne 0) {
+                Write-Error "Remote has commits not in local (or histories diverged). Aborting push."
+              }
+            }
+
+            # Push only the main branch (fast-forward or create remote if missing)
+            git push --tags github HEAD:refs/heads/main
+            if ($LASTEXITCODE -ne 0) { throw "git push failed with exit code $LASTEXITCODE" }
+            
+          }
+          finally {
+            
+            # Remove the remote so the PAT isn't left in .git/config
+            git remote remove github 2>$null | Out-Null
+            
+          }
+      env:
+        PAT: $(PAT)
+
+- stage: deploy
+  displayName: Deploy
+  dependsOn: [versioning, build] 
+  variables:
+    SemVersion: $[ stageDependencies.versioning.get_version.outputs['gitver.SemVersion'] ]
+  jobs:
+  - job: upload
+    displayName: Upload Package
     steps:
     - download: current
       artifact: drop
@@ -117,22 +207,3 @@ stages:
         packagesToPush: '$(Pipeline.Workspace)/**/*.nupkg;!$(Pipeline.Workspace)/**/*.symbols.nupkg'
         nuGetFeedType: 'external'
         publishFeedCredentials: 'STUEBER SYSTEMS | nuget.org'
-
-- stage: GitHub
-  jobs:
-  - job: 
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
-    steps:
-    - checkout: self
-      persistCredentials: true
-    - task: PowerShell@2
-      displayName: 'Push to GitHub'
-      inputs:
-        targetType: 'inline'
-        script: |
-          git remote add github https://$(PAT)@github.com/enbrea/enbrea.ics.git
-          git fetch github
-          git checkout .
-          git push github HEAD:main
-          git push --tags github HEAD:main
-        pwsh: true
