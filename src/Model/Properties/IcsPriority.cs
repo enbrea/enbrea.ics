@@ -19,7 +19,7 @@ namespace Enbrea.Ics
         /// <summary>
         /// Initializes a new instance of the <see cref="IcsPriority"/> class.
         /// </summary>
-        /// <param name="contentLine">Raw content line of the property</param>
+        /// <param name="contentLine">Raw content-line of the property</param>
         public IcsPriority(IcsContentLine contentLine)
             : base(contentLine)
         {

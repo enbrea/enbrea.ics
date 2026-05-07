@@ -22,28 +22,7 @@ namespace Enbrea.Ics.Tests
     public class TestIcsContentLineParser
     {
         [Fact]
-        public void SupportFoldedLines()
-        {
-            var textLine =
-                "DESCRIPTION:This is a lo" + Environment.NewLine +
-                " ng description" + Environment.NewLine +
-                "  that exists on a long line.";
-
-            using var strReader = new StringReader(textLine);
-
-            var icsParser = new IcsContentLineParser(strReader);
-
-            Assert.NotNull(icsParser);
-
-            IEnumerator<IcsContentLine> enumerator = icsParser.Read().GetEnumerator();
-
-            Assert.True(enumerator.MoveNext());
-            Assert.Equal("DESCRIPTION", enumerator.Current.Name);
-            Assert.Equal("This is a long description that exists on a long line.", enumerator.Current.Value);
-        }
-
-        [Fact]
-        public void SupportLineWithMultipleParams()
+        public void Read_ParsesLine_WithMultipleParameters()
         {
             var textLine =
                 "ATTENDEE;RSVP=TRUE;ROLE=REQ-PARTICIPANT:mailto:" + Environment.NewLine +
@@ -71,7 +50,7 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportLineWithOneParam()
+        public void Read_ParsesLine_WithQuotedParameter()
         {
             var textLine =
                 "ATTENDEE;MEMBER=\"mailto:ietf-calsch@example.org\":mailto:jsmith@example.com";
@@ -88,6 +67,45 @@ namespace Enbrea.Ics.Tests
             Assert.Equal("ATTENDEE", enumerator.Current.Name);
             Assert.Equal("mailto:ietf-calsch@example.org", enumerator.Current.GetParameter("MEMBER"));
             Assert.Equal("mailto:jsmith@example.com", enumerator.Current.Value);
+        }
+
+        [Fact]
+        public void Read_ReportsCorrectLineNumber_InParserException()
+        {
+            var textLine =
+                "SUMMARY:First line" + Environment.NewLine +
+                "INVALID=NAME:Second line";
+
+            using var strReader = new StringReader(textLine);
+            var icsParser = new IcsContentLineParser(strReader);
+
+            using IEnumerator<IcsContentLine> enumerator = icsParser.Read().GetEnumerator();
+
+            Assert.True(enumerator.MoveNext());
+
+            var exception = Assert.Throws<IcsContentLineParserException>(() => enumerator.MoveNext());
+            Assert.Contains("Line 2:", exception.Message);
+        }
+
+        [Fact]
+        public void Read_UnfoldsFoldedLine_Correctly()
+        {
+            var textLine =
+                "DESCRIPTION:This is a lo" + Environment.NewLine +
+                " ng description" + Environment.NewLine +
+                "  that exists on a long line.";
+
+            using var strReader = new StringReader(textLine);
+
+            var icsParser = new IcsContentLineParser(strReader);
+
+            Assert.NotNull(icsParser);
+
+            IEnumerator<IcsContentLine> enumerator = icsParser.Read().GetEnumerator();
+
+            Assert.True(enumerator.MoveNext());
+            Assert.Equal("DESCRIPTION", enumerator.Current.Name);
+            Assert.Equal("This is a long description that exists on a long line.", enumerator.Current.Value);
         }
     }
 }

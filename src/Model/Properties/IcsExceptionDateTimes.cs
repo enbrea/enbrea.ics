@@ -21,7 +21,7 @@ namespace Enbrea.Ics
         /// <summary>
         /// Initializes a new instance of the <see cref="IcsExceptionDateTimes"/> class.
         /// </summary>
-        /// <param name="contentLine">Raw content line of the property</param>
+        /// <param name="contentLine">Raw content-line of the property</param>
         public IcsExceptionDateTimes(IcsContentLine contentLine)
             : base(contentLine)
         {

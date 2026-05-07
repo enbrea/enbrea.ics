@@ -20,7 +20,7 @@ namespace Enbrea.Ics.Tests
     public class TestStringExtensions
     {
         [Fact]
-        public void SupportEscapeString_1()
+        public void Escape_ConvertsNewLines_ToIcsEscapes()
         {
             var text =
                 $"This is a long {Environment.NewLine}description {Environment.NewLine}that exists on a long line.";
@@ -31,7 +31,7 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportEscapeString_2()
+        public void Escape_ConvertsSpecialCharacters_ToIcsEscapes()
         {
             var text =
                 "This is an unescaped string: \\ + , + ;";
@@ -42,7 +42,17 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportUnEscapeString_1()
+        public void Escape_ReturnsSameInstance_WhenNoEscapingIsNeeded()
+        {
+            var text = "This string needs no escaping.";
+
+            var str = text.Escape();
+
+            Assert.Same(text, str);
+        }
+
+        [Fact]
+        public void UnEscape_ConvertsIcsEscapes_ToNewLines()
         {
             var text =
                 "This is a long \\ndescription \\nthat exists on a long line.";
@@ -53,7 +63,7 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportUnEscapeString_2()
+        public void UnEscape_ConvertsIcsEscapes_ToSpecialCharacters()
         {
             var text =
                 "This is an escaped string: \\\\ + \\, + \\;";
@@ -61,6 +71,16 @@ namespace Enbrea.Ics.Tests
             var str = text.UnEscape();
 
             Assert.Equal("This is an escaped string: \\ + , + ;", str);
+        }
+
+        [Fact]
+        public void UnEscape_ReturnsSameInstance_WhenNoUnescapingIsNeeded()
+        {
+            var text = "This string is already unescaped.";
+
+            var str = text.UnEscape();
+
+            Assert.Same(text, str);
         }
     }
 }

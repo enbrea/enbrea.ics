@@ -11,6 +11,9 @@
 
 namespace Enbrea.Ics
 {
+    /// <summary>
+    /// Specifies the types of tokens recognized when parsing iCalendar (ICS) data.
+    /// </summary>
     public enum IcsTokenType { 
         Name, 
         ParamName, 

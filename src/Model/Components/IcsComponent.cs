@@ -1,4 +1,4 @@
-﻿#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
+#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
 /*    
  *    ENBREA.ICS 
  *    
@@ -11,6 +11,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Enbrea.Ics
@@ -27,7 +28,7 @@ namespace Enbrea.Ics
         public IcsComponent(string name)
         {
             Name = name;
-            CustomProperties = new List<IcsContentLine>();
+            CustomProperties = [];
         }
 
         /// <summary>
@@ -70,11 +71,11 @@ namespace Enbrea.Ics
         /// </summary>
         /// <param name="textWriter">Text writer</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
-        public virtual async Task WriteContentAsync(TextWriter textWriter)
+        public virtual async Task WriteContentAsync(TextWriter textWriter, CancellationToken cancellationToken = default)
         {
             foreach (var property in CustomProperties)
             {
-                await textWriter.WriteContentAsync(property);
+                await textWriter.WriteContentAsync(property, cancellationToken).ConfigureAwait(false);
             }
         }
     }

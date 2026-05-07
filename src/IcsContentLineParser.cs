@@ -1,4 +1,4 @@
-﻿#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
+#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
 /*    
  *    ENBREA.ICS 
  *    
@@ -13,25 +13,26 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Enbrea.Ics
 {
     /// <summary>
-    /// A low level command line parser for the iCalendar data format as defined in https://datatracker.ietf.org/doc/html/rfc5545
+    /// A low-level content-line parser for the iCalendar data format as defined by https://datatracker.ietf.org/doc/html/rfc5545
     /// </summary>
     public class IcsContentLineParser
     {
         private const int _bufferSize = 1024;
         private readonly char[] _buffer;
         private readonly TextReader _textReader;
+        private readonly IcsTokenBuilder _tokenBuilder;
         private int _bufferEnd = 0;
         private int _bufferPosition = 0;
         private TokenizerState _currentState;
         private int _lineCount = 0;
         private TokenizerState _previousState;
         private IcsToken _token;
-        private IcsTokenBuilder _tokenBuilder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IcsContentLineParser"/> class.
@@ -62,7 +63,7 @@ namespace Enbrea.Ics
         private enum TokenizerWorkflow { IgnoreToken, ConsumeToken, Continue }
 
         /// <summary>
-        /// Reads all command lines out of the iCalendar stream and gives back an enumerator for the 
+        /// Reads all command-lines out of the iCalendar stream and gives back an enumerator for the 
         /// <see cref="IcsContentLine"/> instances.
         /// </summary>
         /// <typeparam name="IcsContentLine">The <see cref="IcsContentLine"/> object type</typeparam>
@@ -102,18 +103,18 @@ namespace Enbrea.Ics
         }
 
         /// <summary>
-        /// Reads all command lines out of the iCalendar stream and gives back an enumerator for the 
+        /// Reads all command-lines out of the iCalendar stream and gives back an enumerator for the 
         /// <see cref="IcsContentLine"/> instances.
         /// </summary>
-        /// <typeparam name="IcsCommandLine">The <see cref="IcsContentLine"/> object type</typeparam>
+        /// <typeparam name="IcsContentLine">The <see cref="IcsContentLine"/> object type</typeparam>
         /// <returns>An async enumerator of <see cref="IcsContentLine"/> object instances</returns>
-        public async IAsyncEnumerable<IcsContentLine> ReadAsync()
+        public async IAsyncEnumerable<IcsContentLine> ReadAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var cl = new IcsContentLine();
             var pn = (string)null;
             do
             {
-                if (await NextTokenAsync())
+                if (await NextTokenAsync(cancellationToken).ConfigureAwait(false))
                 {
                     switch (_token.Type)
                     {
@@ -147,7 +148,7 @@ namespace Enbrea.Ics
         /// <param name="c">The character.</param>
         /// <returns>Category of the character.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private CharCategory Categorise(char c)
+        private static CharCategory Categorize(char c)
         {
             if (c == '\0')
             {
@@ -215,11 +216,11 @@ namespace Enbrea.Ics
         /// </summary>
         /// <returns>A task that represents the asynchronous operation. The value of the TResult
         /// parameter contains the next character from the iCalendar source or EoF if nothing to read.</returns>
-        private async ValueTask<char> NextCharAsync()
+        private async ValueTask<char> NextCharAsync(CancellationToken cancellationToken)
         {
             if (_bufferPosition >= _bufferEnd - 1)
             {
-                _bufferEnd = await _textReader.ReadAsync(_buffer, 0, _bufferSize);
+                _bufferEnd = await _textReader.ReadAsync(_buffer.AsMemory(0, _bufferSize), cancellationToken).ConfigureAwait(false);
                 if (_bufferEnd > 0)
                 {
                     _bufferPosition = 0;
@@ -262,11 +263,11 @@ namespace Enbrea.Ics
         /// <returns>A task that represents the asynchronous operation. The value of the 
         /// TResult parameter is true if token could be read; otherwise false.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async ValueTask<bool> NextTokenAsync()
+        private async ValueTask<bool> NextTokenAsync(CancellationToken cancellationToken)
         {
             while (true)
             {
-                switch (Parse(await NextCharAsync()))
+                switch (Parse(await NextCharAsync(cancellationToken).ConfigureAwait(false)))
                 {
                     case TokenizerWorkflow.IgnoreToken:
                         return false;
@@ -288,7 +289,7 @@ namespace Enbrea.Ics
             {
                 case TokenizerState.IsInName:
                     {
-                        switch (Categorise(c))
+                        switch (Categorize(c))
                         {
                             case CharCategory.IsEqualSign:
                                 throw ThrowException($"Character {c} not allowed in command name.");
@@ -303,14 +304,14 @@ namespace Enbrea.Ics
                                 UpdateTokenizerState(TokenizerState.IsInValue);
                                 return TokenizerWorkflow.ConsumeToken;
                             default:
-                                _tokenBuilder.Append(char.ToUpper(c));
+                                _tokenBuilder.Append(char.ToUpperInvariant(c));
                                 return TokenizerWorkflow.Continue;
                         }
                     }
 
                 case TokenizerState.IsInParamName:
                     {
-                        switch (Categorise(c))
+                        switch (Categorize(c))
                         {
                             case CharCategory.IsSemicolon:
                             case CharCategory.IsColon:
@@ -321,14 +322,14 @@ namespace Enbrea.Ics
                                 UpdateTokenizerState(TokenizerState.IsSeekingForParamValue);
                                 return TokenizerWorkflow.ConsumeToken;
                             default:
-                                _tokenBuilder.Append(char.ToUpper(c));
+                                _tokenBuilder.Append(char.ToUpperInvariant(c));
                                 return TokenizerWorkflow.Continue;
                         }
                     }
 
                 case TokenizerState.IsSeekingForParamValue:
                     {
-                        switch (Categorise(c))
+                        switch (Categorize(c))
                         {
                             case CharCategory.IsSemicolon:
                             case CharCategory.IsColon:
@@ -345,7 +346,7 @@ namespace Enbrea.Ics
 
                 case TokenizerState.IsInParamValue:
                     {
-                        switch (Categorise(c))
+                        switch (Categorize(c))
                         {
                             case CharCategory.IsSemicolon:
                                 _token = _tokenBuilder.ToToken();
@@ -365,7 +366,7 @@ namespace Enbrea.Ics
 
                 case TokenizerState.IsInQuotedParamValue:
                     {
-                        switch (Categorise(c))
+                        switch (Categorize(c))
                         {
                             case CharCategory.IsQuote:
                                 UpdateTokenizerState(TokenizerState.IsAfterQuotedParamValue);
@@ -378,7 +379,7 @@ namespace Enbrea.Ics
 
                 case TokenizerState.IsAfterQuotedParamValue:
                     {
-                        switch (Categorise(c))
+                        switch (Categorize(c))
                         {
                             case CharCategory.IsSemicolon:
                                 _token = _tokenBuilder.ToToken();
@@ -397,7 +398,7 @@ namespace Enbrea.Ics
 
                 case TokenizerState.IsInValue:
                     {
-                        switch (Categorise(c))
+                        switch (Categorize(c))
                         {
                             case CharCategory.IsEndOfLine:
                                 UpdateTokenizerState(TokenizerState.IsEndOfLine);
@@ -415,7 +416,7 @@ namespace Enbrea.Ics
 
                 case TokenizerState.IsEndOfLine:
                     {
-                        switch (Categorise(c))
+                        switch (Categorize(c))
                         {
                             case CharCategory.IsWhitespace:
                                 UpdateTokenizerState(_previousState);
@@ -425,6 +426,7 @@ namespace Enbrea.Ics
                             case CharCategory.IsEndOfFile:
                                 return TokenizerWorkflow.IgnoreToken;
                             default:
+                                _lineCount++;
                                 _token = _tokenBuilder.ToToken();
                                 _tokenBuilder.Reset(IcsTokenType.Name);
                                 UpdateTokenizerState(TokenizerState.IsInName);
@@ -442,7 +444,7 @@ namespace Enbrea.Ics
         /// </summary>
         /// <param name="message">Exception message</param>
         /// <returns>The newly created Exception instance</returns>
-        private Exception ThrowException(string message)
+        private IcsContentLineParserException ThrowException(string message)
         {
             return new IcsContentLineParserException(_lineCount + 1, message);
         }

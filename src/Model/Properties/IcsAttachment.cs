@@ -21,7 +21,7 @@ namespace Enbrea.Ics
         /// <summary>
         /// Initializes a new instance of the <see cref="IcsAttachment"/> class.
         /// </summary>
-        /// <param name="contentLine">Raw content line of the property</param>
+        /// <param name="contentLine">Raw content-line of the property</param>
         public IcsAttachment(IcsContentLine contentLine)
             : base(contentLine)
         {

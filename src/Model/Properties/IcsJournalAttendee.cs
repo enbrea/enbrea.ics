@@ -19,7 +19,7 @@ namespace Enbrea.Ics
         /// <summary>
         /// Initializes a new instance of the <see cref="IcsJournalAttendee"/> class.
         /// </summary>
-        /// <param name="contentLine">Raw content line of the property</param>
+        /// <param name="contentLine">Raw content-line of the property</param>
         public IcsJournalAttendee(IcsContentLine contentLine)
             : base(contentLine)
         {

@@ -29,7 +29,7 @@ namespace Enbrea.Ics.Tests
         [InlineData("P7W", 49, 0, 0, 0)]
         [InlineData("P0D", 0, 0, 0, 0)]
         [InlineData("P0W", 0, 0, 0, 0)]
-        public void SupportCommonCases(string input, int expectedDays, int expectedHours, int expectedMinutes, int expectedSeconds)
+        public void Parse_ReturnsExpectedTimeSpan_ForCommonCases(string input, int expectedDays, int expectedHours, int expectedMinutes, int expectedSeconds)
         {
             var duration = IcsTimeSpanParser.Parse(input);
 
@@ -40,7 +40,7 @@ namespace Enbrea.Ics.Tests
         [InlineData("PT4.5S", 0, 0, 0, 4, 500)]
         [InlineData("+PT4.25S", 0, 0, 0, 4, 250)]
         [InlineData("-PT2.75S", 0, 0, 0, -2, -750)]
-        public void SupportFractionalSeconds(string input, int expectedDays, int expectedHours, int expectedMinutes, int expectedSeconds, int expectedMilliseconds)
+        public void Parse_ReturnsExpectedTimeSpan_ForFractionalSeconds(string input, int expectedDays, int expectedHours, int expectedMinutes, int expectedSeconds, int expectedMilliseconds)
         {
             var duration = IcsTimeSpanParser.Parse(input);
 

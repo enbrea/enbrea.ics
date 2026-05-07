@@ -19,7 +19,7 @@ namespace Enbrea.Ics
         /// <summary>
         /// Initializes a new instance of the <see cref="IcsProperty"/> class.
         /// </summary>
-        /// <param name="contentLine">Raw content line of the property</param>
+        /// <param name="contentLine">Raw content-line of the property</param>
         public IcsProperty(IcsContentLine contentLine)
         {
             ContentLine = contentLine;
@@ -45,7 +45,7 @@ namespace Enbrea.Ics
         }
 
         /// <summary>
-        /// The raw content line of the property.
+        /// The raw content-line of the property.
         /// </summary>
         public IcsContentLine ContentLine { get; }
     }

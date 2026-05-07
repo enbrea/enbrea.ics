@@ -20,7 +20,7 @@ namespace Enbrea.Ics.Tests
     public class TestIcsRecurrencePattern
     {
         [Fact]
-        public void SupportDaily_1()
+        public void Parse_ReturnsExpectedPattern_ForDailyCountRule()
         {
             var textLine = "FREQ=DAILY;COUNT=10";
 
@@ -32,34 +32,7 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportDaily_2()
-        {
-            var textLine = "FREQ=DAILY;UNTIL=19971224T000000Z";
-
-            var rule = IcsRecurrencePattern.Parse(textLine);
-
-            Assert.Equal(IcsRecurrenceFrequency.Daily, rule.Frequency);
-            Assert.Equal(new DateTime(1997, 12, 24, 0, 0, 0), rule.UntilAsDateTime);
-            Assert.Equal(DateTimeKind.Utc, rule.UntilAsDateTime?.Kind);
-            Assert.True(rule.UntilIsDateTime());
-            Assert.False(rule.UntilIsDate());
-            Assert.Equal(textLine, rule.ToString());
-        }
-
-        [Fact]
-        public void SupportDaily_3()
-        {
-            var textLine = "FREQ=DAILY;INTERVAL=2";
-
-            var rule = IcsRecurrencePattern.Parse(textLine);
-
-            Assert.Equal(IcsRecurrenceFrequency.Daily, rule.Frequency);
-            Assert.Equal(2, rule.Interval);
-            Assert.Equal(textLine, rule.ToString());
-        }
-
-        [Fact]
-        public void SupportDaily_4()
+        public void Parse_ReturnsExpectedPattern_ForDailyIntervalAndCountRule()
         {
             var textLine = "FREQ=DAILY;INTERVAL=10;COUNT=5";
 
@@ -72,7 +45,33 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportHourly_1()
+        public void Parse_ReturnsExpectedPattern_ForDailyIntervalRule()
+        {
+            var textLine = "FREQ=DAILY;INTERVAL=2";
+
+            var rule = IcsRecurrencePattern.Parse(textLine);
+
+            Assert.Equal(IcsRecurrenceFrequency.Daily, rule.Frequency);
+            Assert.Equal(2, rule.Interval);
+            Assert.Equal(textLine, rule.ToString());
+        }
+
+        [Fact]
+        public void Parse_ReturnsExpectedPattern_ForDailyUntilDateTimeRule()
+        {
+            var textLine = "FREQ=DAILY;UNTIL=19971224T000000Z";
+
+            var rule = IcsRecurrencePattern.Parse(textLine);
+
+            Assert.Equal(IcsRecurrenceFrequency.Daily, rule.Frequency);
+            Assert.Equal(new DateTime(1997, 12, 24, 0, 0, 0), rule.UntilAsDateTime);
+            Assert.Equal(DateTimeKind.Utc, rule.UntilAsDateTime?.Kind);
+            Assert.True(rule.UntilIsDateTime());
+            Assert.False(rule.UntilIsDate());
+            Assert.Equal(textLine, rule.ToString());
+        }
+        [Fact]
+        public void Parse_ReturnsExpectedPattern_ForHourlyUntilDateTimeRule()
         {
             var textLine = "FREQ=HOURLY;INTERVAL=3;UNTIL=19970902T170000Z";
 
@@ -88,7 +87,7 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportMinutely_1()
+        public void Parse_ReturnsExpectedPattern_ForMinutelyIntervalAndCountRule()
         {
             var textLine = "FREQ=MINUTELY;INTERVAL=90;COUNT=4";
 
@@ -101,7 +100,7 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportMinutely_2()
+        public void Parse_ReturnsExpectedPattern_ForMinutelyUntilDateRule()
         {
             var textLine = "FREQ=MINUTELY;INTERVAL=90;UNTIL=19970902";
 
@@ -116,7 +115,7 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportMonthly_1()
+        public void Parse_ReturnsExpectedPattern_ForMonthlyByDayRule()
         {
             var textLine = "FREQ=MONTHLY;UNTIL=19971224T000000Z;BYDAY=1FR";
 
@@ -133,7 +132,7 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportMonthly_2()
+        public void Parse_ReturnsExpectedPattern_ForMonthlyByDayWithPositiveAndNegativeOccurrenceRule()
         {
             var textLine = "FREQ=MONTHLY;INTERVAL=2;COUNT=10;BYDAY=1SU,-1SU";
 
@@ -150,21 +149,7 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportMonthly_3()
-        {
-            var textLine = "FREQ=MONTHLY;COUNT=10;BYMONTHDAY=1,-1";
-
-            var rule = IcsRecurrencePattern.Parse(textLine);
-
-            Assert.Equal(IcsRecurrenceFrequency.Monthly, rule.Frequency);
-            Assert.Equal(10, rule.Count);
-            Assert.Equal(+1, rule.ByMonthDay[0]);
-            Assert.Equal(-1, rule.ByMonthDay[1]);
-            Assert.Equal(textLine, rule.ToString());
-        }
-
-        [Fact]
-        public void SupportMonthly_4()
+        public void Parse_ReturnsExpectedPattern_ForMonthlyByMonthDayListRule()
         {
             var textLine = "FREQ=MONTHLY;INTERVAL=18;COUNT=10;BYMONTHDAY=10,11,12,13,14,15";
 
@@ -183,7 +168,20 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportWeekly_1()
+        public void Parse_ReturnsExpectedPattern_ForMonthlyByMonthDayRule()
+        {
+            var textLine = "FREQ=MONTHLY;COUNT=10;BYMONTHDAY=1,-1";
+
+            var rule = IcsRecurrencePattern.Parse(textLine);
+
+            Assert.Equal(IcsRecurrenceFrequency.Monthly, rule.Frequency);
+            Assert.Equal(10, rule.Count);
+            Assert.Equal(+1, rule.ByMonthDay[0]);
+            Assert.Equal(-1, rule.ByMonthDay[1]);
+            Assert.Equal(textLine, rule.ToString());
+        }
+        [Fact]
+        public void Parse_ReturnsExpectedPattern_ForWeeklyCountRule()
         {
             var textLine = "FREQ=WEEKLY;COUNT=10";
 
@@ -195,7 +193,7 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportWeekly_2()
+        public void Parse_ReturnsExpectedPattern_ForWeeklyIntervalWithWeekStartRule()
         {
             var textLine = "FREQ=WEEKLY;INTERVAL=2;WKST=SU";
 
@@ -208,7 +206,7 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportWeekly_3()
+        public void Parse_ReturnsExpectedPattern_ForWeeklyUntilByDayRule()
         {
             var textLine = "FREQ=WEEKLY;UNTIL=19971007T000000Z;WKST=SU;BYDAY=TU,TH";
 
@@ -226,7 +224,7 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportYearly_1()
+        public void Parse_ReturnsExpectedPattern_ForYearlyByMonthAndByDayRule()
         {
             var textLine = "FREQ=YEARLY;UNTIL=20000131T140000Z;BYMONTH=1;BYDAY=SU,MO,TU,WE,TH,FR,SA";
 
@@ -249,7 +247,7 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportYearly_2()
+        public void Parse_ReturnsExpectedPattern_ForYearlyByMonthListRule()
         {
             var textLine = "FREQ=YEARLY;INTERVAL=2;COUNT=10;BYMONTH=1,2,3";
 
@@ -265,7 +263,7 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public void SupportYearly_3()
+        public void Parse_ReturnsExpectedPattern_ForYearlyByYearDayListRule()
         {
             var textLine = "FREQ=YEARLY;INTERVAL=3;COUNT=10;BYYEARDAY=1,100,200";
 

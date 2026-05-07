@@ -91,7 +91,7 @@ namespace Enbrea.Ics
         /// <returns>
         /// True if the value parameter equals the value of this instance; otherwise, false.
         /// </returns>
-        public bool Equals(IcsGeoPosition other)
+        public readonly bool Equals(IcsGeoPosition other)
         {
             return Latitude.Equals(other.Latitude) && Longitude.Equals(other.Longitude);
         }
@@ -104,7 +104,7 @@ namespace Enbrea.Ics
         /// True if value is an instance of <see cref="IcsGeoPosition"/> and equals the value 
         /// of this instance; otherwise, false.
         /// </returns>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is IcsGeoPosition other && Equals(other);
         }
@@ -113,7 +113,7 @@ namespace Enbrea.Ics
         /// Returns the hash code for this instance.
         /// </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(Latitude, Longitude);
         }
@@ -123,7 +123,7 @@ namespace Enbrea.Ics
         /// equivalent string representation.
         /// </summary>
         /// <returns>A string that contains the string representation.</returns>        
-        public override string ToString()
+        public override readonly string ToString()
         {
             return string.Join(';', IcsConverter.FromFloat(Latitude), IcsConverter.FromFloat(Longitude));
         }

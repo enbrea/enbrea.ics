@@ -21,7 +21,7 @@ namespace Enbrea.Ics
         /// <summary>
         /// Initializes a new instance of the <see cref="IcsDateTimeStart"/> class.
         /// </summary>
-        /// <param name="contentLine">Raw content line of the property</param>
+        /// <param name="contentLine">Raw content-line of the property</param>
         public IcsDateTimeStart(IcsContentLine contentLine)
             : base(contentLine)
         {

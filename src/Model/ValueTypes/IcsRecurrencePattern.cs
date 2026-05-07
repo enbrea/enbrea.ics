@@ -20,14 +20,14 @@ namespace Enbrea.Ics
     /// </summary>
     public class IcsRecurrencePattern
     {
-        private readonly IDictionary<string, string> _parameters;
+        private readonly Dictionary<string, string> _parameters;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IcsRecurrencePattern"/> class.
         /// </summary>
         public IcsRecurrencePattern()
         {
-            _parameters = new Dictionary<string, string>();
+            _parameters = [];
         }
 
         /// <summary>
@@ -288,7 +288,7 @@ namespace Enbrea.Ics
         }
 
         /// <summary>
-        /// Removes all parameters from the content line
+        /// Removes all parameters from the content-line
         /// </summary>
         public void ClearParameters()
         {
@@ -296,7 +296,7 @@ namespace Enbrea.Ics
         }
 
         /// <summary>
-        /// Determines whether content line contains a parameter
+        /// Determines whether content-line contains a parameter
         /// with the specified name.
         /// </summary>
         /// <param name="name">The name of the parameter</param>
@@ -333,15 +333,12 @@ namespace Enbrea.Ics
         }
 
         /// <summary>
-        /// Removes a parameter from the content line
+        /// Removes a parameter from the content-line
         /// </summary>
         /// <param name="name">The name of the parameter</param>
         public void RemoveParameter(string name)
         {
-            if (_parameters.ContainsKey(name))
-            {
-                _parameters.Remove(name);
-            }
+            _parameters.Remove(name);
         }
 
         /// <summary>
@@ -351,18 +348,11 @@ namespace Enbrea.Ics
         /// <param name="value">The value of the parameter</param>
         public void SetParameter(string name, string value)
         {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            ArgumentNullException.ThrowIfNull(value);
 
-            if (_parameters.ContainsKey(name))
+            if (!_parameters.TryAdd(name, value))
             {
                 _parameters[name] = value;
-            }
-            else
-            {
-                _parameters.Add(name, value);
             }
         }
 

@@ -21,8 +21,25 @@ namespace Enbrea.Ics
     {
         public static string Escape(this string value)
         {
+            // If the string is empty, we can return it as is
             if (value.Length == 0) return value;
 
+            // Check if escaping is required
+            var requiresEscaping = false;
+            
+            for (var i = 0; i < value.Length; i++)
+            {
+                var c = value[i];
+                if (c == ',' || c == ';' || c == '\\' || c == '\n' || c == '\r')
+                {
+                    requiresEscaping = true;
+                    break;
+                }
+            }
+
+            if (!requiresEscaping) return value;
+
+            // Escaping is required, so we create a new string with the escaped characters
             var sb = new StringBuilder(value.Length);
 
             for (var i = 0; i < value.Length; i++)
@@ -54,8 +71,13 @@ namespace Enbrea.Ics
 
         public static string UnEscape(this string value)
         {
+            // If the string is empty or has only one character, we can return it as is
             if (value.Length <= 1) return value;
 
+            // Check if unescaping is required
+            if (!value.Contains('\\')) return value;
+
+            // Unescaping is required, so we create a new string with the unescaped characters
             var sb = new StringBuilder(value.Length);
 
             for (var i = 0; i < value.Length; i++)

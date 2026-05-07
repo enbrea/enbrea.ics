@@ -1,4 +1,4 @@
-﻿#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
+#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
 /*    
  *    ENBREA.ICS 
  *    
@@ -9,8 +9,11 @@
  */
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Enbrea.Ics
@@ -25,9 +28,9 @@ namespace Enbrea.Ics
             component.WriteContent(textWriter);
         }
 
-        public static async Task WriteComponentAsync(this TextWriter textWriter, IcsComponent component)
+        public static Task WriteComponentAsync(this TextWriter textWriter, IcsComponent component, CancellationToken cancellationToken = default)
         {
-            await component.WriteContentAsync(textWriter);
+            return component.WriteContentAsync(textWriter, cancellationToken);
         }
 
         public static void WriteComponentList<T>(this TextWriter textWriter, IList<T> componentList)
@@ -39,12 +42,12 @@ namespace Enbrea.Ics
             }
         }
 
-        public static async Task WriteComponentListAsync<T>(this TextWriter textWriter, IList<T> componentList)
+        public static async Task WriteComponentListAsync<T>(this TextWriter textWriter, IList<T> componentList, CancellationToken cancellationToken = default)
             where T : IcsComponent
         {
             foreach (var component in componentList)
             {
-                await component.WriteContentAsync(textWriter);
+                await component.WriteContentAsync(textWriter, cancellationToken).ConfigureAwait(false); 
             }
         }
 
@@ -58,14 +61,14 @@ namespace Enbrea.Ics
             textWriter.WriteLine(contentLine.ToString());
         }
 
-        public static async Task WriteContentAsync(this TextWriter textWriter, string name, string value)
+        public static async Task WriteContentAsync(this TextWriter textWriter, string name, string value, CancellationToken cancellationToken = default)
         {
-            await textWriter.WriteLineAsync(IcsContentLine.ToString(name, value));
+            await textWriter.WriteLineAsync(IcsContentLine.ToString(name, value).AsMemory(), cancellationToken).ConfigureAwait(false);
         }
 
-        public static async Task WriteContentAsync(this TextWriter textWriter, IcsContentLine contentLine)
+        public static async Task WriteContentAsync(this TextWriter textWriter, IcsContentLine contentLine, CancellationToken cancellationToken = default)
         {
-            await textWriter.WriteLineAsync(contentLine.ToString());
+            await textWriter.WriteLineAsync(contentLine.ToString().AsMemory(), cancellationToken).ConfigureAwait(false);
         }
 
         public static void WriteProperty(this TextWriter textWriter, IcsProperty property)
@@ -76,11 +79,11 @@ namespace Enbrea.Ics
             }
         }
 
-        public static async Task WritePropertyAsync(this TextWriter textWriter, IcsProperty property)
+        public static async Task WritePropertyAsync(this TextWriter textWriter, IcsProperty property, CancellationToken cancellationToken = default)
         {
             if (property != null)
             {
-                await textWriter.WriteLineAsync(property.ContentLine.ToString());
+                await textWriter.WriteLineAsync(property.ContentLine.ToString().AsMemory(), cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -93,13 +96,25 @@ namespace Enbrea.Ics
             }
         }
 
-        public static async Task WritePropertyListAsync<T>(this TextWriter textWriter, IList<T> propertyList)
+        public static async Task WritePropertyListAsync<T>(this TextWriter textWriter, IList<T> propertyList, CancellationToken cancellationToken = default)
             where T : IcsProperty
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (propertyList.Count == 0)
+            {
+                return;
+            }
+
+            var sb = new StringBuilder();
+            using var bufferWriter = new StringWriter(sb);
+
             foreach (var property in propertyList)
             {
-                await textWriter.WriteLineAsync(property.ContentLine.ToString());
+                bufferWriter.WriteLine(property.ContentLine.ToString());
             }
+
+            await textWriter.WriteAsync(sb.ToString().AsMemory(), cancellationToken).ConfigureAwait(false);
         }
     }
 }

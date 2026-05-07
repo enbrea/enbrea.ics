@@ -69,7 +69,7 @@ namespace Enbrea.Ics
 
         public static string FromByteArray(byte[] values)
         {
-            return string.Join(',', values.ToString());
+            return string.Join(',', values);
         }
 
         public static string FromClassificationValue(IcsClassificationValue? value)
@@ -104,7 +104,7 @@ namespace Enbrea.Ics
 
         public static string FromDateOnlyArray(DateOnly[] values)
         {
-            return string.Join(',', values.ToString());
+            return string.Join(',', values);
         }
 
         public static string FromDateTime(DateTime? value)
@@ -128,7 +128,7 @@ namespace Enbrea.Ics
 
         public static string FromDateTimeArray(DateTime[] values)
         {
-            return string.Join(',', values.ToString());
+            return string.Join(',', values);
         }
 
         public static string FromDayOfWeek(DayOfWeek? value)
@@ -302,7 +302,7 @@ namespace Enbrea.Ics
 
         public static string FromPeriodArray(IcsPeriod[] values)
         {
-            return string.Join(',', values.ToString());
+            return string.Join(',', values);
         }
 
         public static string FromRecurrenceFrequency(IcsRecurrenceFrequency? value)
@@ -388,17 +388,17 @@ namespace Enbrea.Ics
 
         public static string FromRRuleByDayArray(IcsDayRule[] values)
         {
-            return string.Join(',', values.ToString());
+            return string.Join(',', values);
         }
 
         public static string FromSByteArray(sbyte[] values)
         {
-            return string.Join(',', values.ToString());
+            return string.Join(',', values);
         }
 
         public static string FromShortArray(short[] values)
         {
-            return string.Join(',', values.ToString());
+            return string.Join(',', values);
         }
 
         public static string FromStringArray(string[] values)
@@ -561,13 +561,11 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "AUDIO" => IcsActionValue.Audio,
-                    "DISPLAY" => IcsActionValue.Display,
-                    "EMAIL" => IcsActionValue.Email,
-                    _ => IcsActionValue.Unknown
-                };
+                if (string.Equals(value, "AUDIO", StringComparison.OrdinalIgnoreCase)) return IcsActionValue.Audio;
+                if (string.Equals(value, "DISPLAY", StringComparison.OrdinalIgnoreCase)) return IcsActionValue.Display;
+                if (string.Equals(value, "EMAIL", StringComparison.OrdinalIgnoreCase)) return IcsActionValue.Email;
+
+                return IcsActionValue.Unknown;
             }
             else
             {
@@ -591,12 +589,10 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "TRUE" => true,
-                    "FALSE" => false,
-                    _ => throw new NotImplementedException(),
-                };
+                if (string.Equals(value, "TRUE", StringComparison.OrdinalIgnoreCase)) return true;
+                if (string.Equals(value, "FALSE", StringComparison.OrdinalIgnoreCase)) return false;
+
+                throw new NotImplementedException();
             }
             else
             {
@@ -620,12 +616,18 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                var parts = value.Split(',');
-                var result = new byte[parts.Length];
+                var span = value.AsSpan();
+                var result = new byte[CountCommaSeparatedValues(span)];
+                var resultIndex = 0;
+                var start = 0;
 
-                for (var i = 0; i < parts.Length; i++)
+                for (var i = 0; i <= span.Length; i++)
                 {
-                    result[i] = byte.Parse(parts[i]);
+                    if (i == span.Length || span[i] == ',')
+                    {
+                        result[resultIndex++] = byte.Parse(span[start..i]);
+                        start = i + 1;
+                    }
                 }
 
                 return result;
@@ -635,17 +637,16 @@ namespace Enbrea.Ics
                 return default;
             }
         }
+
         public static IcsClassificationValue ToClassificationValue(string value)
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "PUBLIC" => IcsClassificationValue.Public,
-                    "PRIVATE" => IcsClassificationValue.Private,
-                    "CONFIDENTIAL" => IcsClassificationValue.Confidential,
-                    _ => IcsClassificationValue.Unknown
-                };
+                if (string.Equals(value, "PUBLIC", StringComparison.OrdinalIgnoreCase)) return IcsClassificationValue.Public;
+                if (string.Equals(value, "PRIVATE", StringComparison.OrdinalIgnoreCase)) return IcsClassificationValue.Private;
+                if (string.Equals(value, "CONFIDENTIAL", StringComparison.OrdinalIgnoreCase)) return IcsClassificationValue.Confidential;
+
+                return IcsClassificationValue.Unknown;
             }
             else
             {
@@ -669,12 +670,18 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                var parts = value.Split(',');
-                var result = new DateOnly[parts.Length];
+                var span = value.AsSpan();
+                var result = new DateOnly[CountCommaSeparatedValues(span)];
+                var resultIndex = 0;
+                var start = 0;
 
-                for (var i = 0; i < parts.Length; i++)
+                for (var i = 0; i <= span.Length; i++)
                 {
-                    result[i] = ToDateOnly(parts[i]);
+                    if (i == span.Length || span[i] == ',')
+                    {
+                        result[resultIndex++] = DateOnly.ParseExact(span[start..i], "yyyyMMdd", CultureInfo.InvariantCulture);
+                        start = i + 1;
+                    }
                 }
 
                 return result;
@@ -720,12 +727,21 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                var parts = value.Split(',');
-                var result = new DateTime[parts.Length];
+                var span = value.AsSpan();
+                var result = new DateTime[CountCommaSeparatedValues(span)];
+                var resultIndex = 0;
+                var start = 0;
 
-                for (var i = 0; i < parts.Length; i++)
+                for (var i = 0; i <= span.Length; i++)
                 {
-                    result[i] = ToDateTime(parts[i]);
+                    if (i == span.Length || span[i] == ',')
+                    {
+                        var part = span[start..i];
+                        result[resultIndex++] = part.EndsWith("Z", StringComparison.Ordinal)
+                            ? DateTime.SpecifyKind(DateTime.ParseExact(part, "yyyyMMdd'T'HHmmss'Z'", CultureInfo.InvariantCulture), DateTimeKind.Utc)
+                            : DateTime.SpecifyKind(DateTime.ParseExact(part, "yyyyMMdd'T'HHmmss", CultureInfo.InvariantCulture), DateTimeKind.Local);
+                        start = i + 1;
+                    }
                 }
 
                 return result;
@@ -739,10 +755,10 @@ namespace Enbrea.Ics
         public static DateTime? ToDateTimeOrDefault(string value)
         {
             if (!string.IsNullOrWhiteSpace(value))
-            { 
+            {
                 if (value.EndsWith('Z'))
                 {
-                    return DateTime.SpecifyKind(DateTime.ParseExact(value, "yyyyMMdd'T'HHmmss'Z'", CultureInfo.InvariantCulture), DateTimeKind.Utc); 
+                    return DateTime.SpecifyKind(DateTime.ParseExact(value, "yyyyMMdd'T'HHmmss'Z'", CultureInfo.InvariantCulture), DateTimeKind.Utc);
                 }
                 else
                 {
@@ -759,17 +775,15 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "MO" => DayOfWeek.Monday,
-                    "TU" => DayOfWeek.Tuesday,
-                    "WE" => DayOfWeek.Wednesday,
-                    "TH" => DayOfWeek.Thursday,
-                    "FR" => DayOfWeek.Friday,
-                    "SA" => DayOfWeek.Saturday,
-                    "SU" => DayOfWeek.Sunday,
-                    _ => throw new FormatException($"{value} is not a valid day of week value.")
-                };
+                if (string.Equals(value, "MO", StringComparison.OrdinalIgnoreCase)) return DayOfWeek.Monday;
+                if (string.Equals(value, "TU", StringComparison.OrdinalIgnoreCase)) return DayOfWeek.Tuesday;
+                if (string.Equals(value, "WE", StringComparison.OrdinalIgnoreCase)) return DayOfWeek.Wednesday;
+                if (string.Equals(value, "TH", StringComparison.OrdinalIgnoreCase)) return DayOfWeek.Thursday;
+                if (string.Equals(value, "FR", StringComparison.OrdinalIgnoreCase)) return DayOfWeek.Friday;
+                if (string.Equals(value, "SA", StringComparison.OrdinalIgnoreCase)) return DayOfWeek.Saturday;
+                if (string.Equals(value, "SU", StringComparison.OrdinalIgnoreCase)) return DayOfWeek.Sunday;
+
+                throw new FormatException($"{value} is not a valid day of week value.");
             }
             else
             {
@@ -781,17 +795,15 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "MO" => DayOfWeek.Monday,
-                    "TU" => DayOfWeek.Tuesday,
-                    "WE" => DayOfWeek.Wednesday,
-                    "TH" => DayOfWeek.Thursday,
-                    "FR" => DayOfWeek.Friday,
-                    "SA" => DayOfWeek.Saturday,
-                    "SU" => DayOfWeek.Sunday,
-                    _ => throw new FormatException($"{value} is not a valid day of week value.")
-                };
+                if (string.Equals(value, "MO", StringComparison.OrdinalIgnoreCase)) return DayOfWeek.Monday;
+                if (string.Equals(value, "TU", StringComparison.OrdinalIgnoreCase)) return DayOfWeek.Tuesday;
+                if (string.Equals(value, "WE", StringComparison.OrdinalIgnoreCase)) return DayOfWeek.Wednesday;
+                if (string.Equals(value, "TH", StringComparison.OrdinalIgnoreCase)) return DayOfWeek.Thursday;
+                if (string.Equals(value, "FR", StringComparison.OrdinalIgnoreCase)) return DayOfWeek.Friday;
+                if (string.Equals(value, "SA", StringComparison.OrdinalIgnoreCase)) return DayOfWeek.Saturday;
+                if (string.Equals(value, "SU", StringComparison.OrdinalIgnoreCase)) return DayOfWeek.Sunday;
+
+                throw new FormatException($"{value} is not a valid day of week value.");
             }
             else
             {
@@ -803,14 +815,12 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "NEEDS-ACTION" => IcsEventParticipationStatus.NeedsAction,
-                    "ACCEPTED" => IcsEventParticipationStatus.Accepted,
-                    "TENTATIVE" => IcsEventParticipationStatus.Tentative,
-                    "DELEGATED" => IcsEventParticipationStatus.Delegated,
-                    _ => IcsEventParticipationStatus.Unknown
-                };
+                if (string.Equals(value, "NEEDS-ACTION", StringComparison.OrdinalIgnoreCase)) return IcsEventParticipationStatus.NeedsAction;
+                if (string.Equals(value, "ACCEPTED", StringComparison.OrdinalIgnoreCase)) return IcsEventParticipationStatus.Accepted;
+                if (string.Equals(value, "TENTATIVE", StringComparison.OrdinalIgnoreCase)) return IcsEventParticipationStatus.Tentative;
+                if (string.Equals(value, "DELEGATED", StringComparison.OrdinalIgnoreCase)) return IcsEventParticipationStatus.Delegated;
+
+                return IcsEventParticipationStatus.Unknown;
             }
             else
             {
@@ -822,13 +832,11 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "TENTATIVE" => IcsEventStatusValue.Tentative,
-                    "CONFIRMED" => IcsEventStatusValue.Confirmed,
-                    "CANCELLED" => IcsEventStatusValue.Cancelled,
-                    _ => IcsEventStatusValue.Unknown
-                };
+                if (string.Equals(value, "TENTATIVE", StringComparison.OrdinalIgnoreCase)) return IcsEventStatusValue.Tentative;
+                if (string.Equals(value, "CONFIRMED", StringComparison.OrdinalIgnoreCase)) return IcsEventStatusValue.Confirmed;
+                if (string.Equals(value, "CANCELLED", StringComparison.OrdinalIgnoreCase)) return IcsEventStatusValue.Cancelled;
+
+                return IcsEventStatusValue.Unknown;
             }
             else
             {
@@ -852,14 +860,12 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "BUSY" => IcsFreeBusyType.Busy,
-                    "FREE" => IcsFreeBusyType.Free,
-                    "BUSY-UNAVAILABLE" => IcsFreeBusyType.BusyUnavailable,
-                    "BUSY-TENTATIVE" => IcsFreeBusyType.BusyTentative,
-                    _ => IcsFreeBusyType.Unknown
-                };
+                if (string.Equals(value, "BUSY", StringComparison.OrdinalIgnoreCase)) return IcsFreeBusyType.Busy;
+                if (string.Equals(value, "FREE", StringComparison.OrdinalIgnoreCase)) return IcsFreeBusyType.Free;
+                if (string.Equals(value, "BUSY-UNAVAILABLE", StringComparison.OrdinalIgnoreCase)) return IcsFreeBusyType.BusyUnavailable;
+                if (string.Equals(value, "BUSY-TENTATIVE", StringComparison.OrdinalIgnoreCase)) return IcsFreeBusyType.BusyTentative;
+
+                return IcsFreeBusyType.Unknown;
             }
             else
             {
@@ -895,13 +901,11 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "NEEDS-ACTION" => IcsJournalParticipationStatus.NeedsAction,
-                    "ACCEPTED" => IcsJournalParticipationStatus.Accepted,
-                    "DECLINED" => IcsJournalParticipationStatus.Declined,
-                    _ => IcsJournalParticipationStatus.Unknown
-                };
+                if (string.Equals(value, "NEEDS-ACTION", StringComparison.OrdinalIgnoreCase)) return IcsJournalParticipationStatus.NeedsAction;
+                if (string.Equals(value, "ACCEPTED", StringComparison.OrdinalIgnoreCase)) return IcsJournalParticipationStatus.Accepted;
+                if (string.Equals(value, "DECLINED", StringComparison.OrdinalIgnoreCase)) return IcsJournalParticipationStatus.Declined;
+
+                return IcsJournalParticipationStatus.Unknown;
             }
             else
             {
@@ -913,13 +917,11 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "DRAFT" => IcsJournalStatusValue.Draft,
-                    "FINAL" => IcsJournalStatusValue.Final,
-                    "CANCELLED" => IcsJournalStatusValue.Cancelled,
-                    _ => IcsJournalStatusValue.Unknown
-                };
+                if (string.Equals(value, "DRAFT", StringComparison.OrdinalIgnoreCase)) return IcsJournalStatusValue.Draft;
+                if (string.Equals(value, "FINAL", StringComparison.OrdinalIgnoreCase)) return IcsJournalStatusValue.Final;
+                if (string.Equals(value, "CANCELLED", StringComparison.OrdinalIgnoreCase)) return IcsJournalStatusValue.Cancelled;
+
+                return IcsJournalStatusValue.Unknown;
             }
             else
             {
@@ -931,14 +933,12 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "CHAIR" => IcsParticipationRole.Chair,
-                    "REQ-PARTICIPANT" => IcsParticipationRole.Required,
-                    "OPT-PARTICIPANT" => IcsParticipationRole.Optional,
-                    "NON-PARTICIPANT" => IcsParticipationRole.None,
-                    _ => IcsParticipationRole.Unknown
-                };
+                if (string.Equals(value, "CHAIR", StringComparison.OrdinalIgnoreCase)) return IcsParticipationRole.Chair;
+                if (string.Equals(value, "REQ-PARTICIPANT", StringComparison.OrdinalIgnoreCase)) return IcsParticipationRole.Required;
+                if (string.Equals(value, "OPT-PARTICIPANT", StringComparison.OrdinalIgnoreCase)) return IcsParticipationRole.Optional;
+                if (string.Equals(value, "NON-PARTICIPANT", StringComparison.OrdinalIgnoreCase)) return IcsParticipationRole.None;
+
+                return IcsParticipationRole.Unknown;
             }
             else
             {
@@ -950,12 +950,18 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                var parts = value.Split(',');
-                var result = new IcsPeriod[parts.Length];
+                var span = value.AsSpan();
+                var result = new IcsPeriod[CountCommaSeparatedValues(span)];
+                var resultIndex = 0;
+                var start = 0;
 
-                for (var i = 0; i < parts.Length; i++)
+                for (var i = 0; i <= span.Length; i++)
                 {
-                    result[i] = IcsPeriod.Parse(parts[i]);
+                    if (i == span.Length || span[i] == ',')
+                    {
+                        result[resultIndex++] = IcsPeriod.Parse(span[start..i].ToString());
+                        start = i + 1;
+                    }
                 }
 
                 return result;
@@ -970,17 +976,15 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "SECONDLY" => IcsRecurrenceFrequency.Secondly,
-                    "MINUTELY" => IcsRecurrenceFrequency.Minutely,
-                    "HOURLY" => IcsRecurrenceFrequency.Hourly,
-                    "DAILY" => IcsRecurrenceFrequency.Daily,
-                    "WEEKLY" => IcsRecurrenceFrequency.Weekly,
-                    "MONTHLY" => IcsRecurrenceFrequency.Monthly,
-                    "YEARLY" => IcsRecurrenceFrequency.Yearly,
-                    _ => throw new FormatException($"{value} is not a valid recurrence frequency value.")
-                };
+                if (string.Equals(value, "SECONDLY", StringComparison.OrdinalIgnoreCase)) return IcsRecurrenceFrequency.Secondly;
+                if (string.Equals(value, "MINUTELY", StringComparison.OrdinalIgnoreCase)) return IcsRecurrenceFrequency.Minutely;
+                if (string.Equals(value, "HOURLY", StringComparison.OrdinalIgnoreCase)) return IcsRecurrenceFrequency.Hourly;
+                if (string.Equals(value, "DAILY", StringComparison.OrdinalIgnoreCase)) return IcsRecurrenceFrequency.Daily;
+                if (string.Equals(value, "WEEKLY", StringComparison.OrdinalIgnoreCase)) return IcsRecurrenceFrequency.Weekly;
+                if (string.Equals(value, "MONTHLY", StringComparison.OrdinalIgnoreCase)) return IcsRecurrenceFrequency.Monthly;
+                if (string.Equals(value, "YEARLY", StringComparison.OrdinalIgnoreCase)) return IcsRecurrenceFrequency.Yearly;
+
+                throw new FormatException($"{value} is not a valid recurrence frequency value.");
             }
             else
             {
@@ -1004,13 +1008,11 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "PARENT" => IcsRelationshipType.Parent,
-                    "CHILD" => IcsRelationshipType.Child,
-                    "SIBLING" => IcsRelationshipType.Sibling,
-                    _ => IcsRelationshipType.Unknown
-                };
+                if (string.Equals(value, "PARENT", StringComparison.OrdinalIgnoreCase)) return IcsRelationshipType.Parent;
+                if (string.Equals(value, "CHILD", StringComparison.OrdinalIgnoreCase)) return IcsRelationshipType.Child;
+                if (string.Equals(value, "SIBLING", StringComparison.OrdinalIgnoreCase)) return IcsRelationshipType.Sibling;
+
+                return IcsRelationshipType.Unknown;
             }
             else
             {
@@ -1022,12 +1024,10 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "START" => IcsTriggerRelationship.Start,
-                    "END" => IcsTriggerRelationship.End,
-                    _ => default
-                };
+                if (string.Equals(value, "START", StringComparison.OrdinalIgnoreCase)) return IcsTriggerRelationship.Start;
+                if (string.Equals(value, "END", StringComparison.OrdinalIgnoreCase)) return IcsTriggerRelationship.End;
+
+                return default;
             }
             else
             {
@@ -1051,12 +1051,18 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                var parts = value.Split(',');
-                var result = new IcsDayRule[parts.Length];
+                var span = value.AsSpan();
+                var result = new IcsDayRule[CountCommaSeparatedValues(span)];
+                var resultIndex = 0;
+                var start = 0;
 
-                for (var i = 0; i < parts.Length; i++)
+                for (var i = 0; i <= span.Length; i++)
                 {
-                    result[i] = IcsDayRule.Parse(parts[i]);
+                    if (i == span.Length || span[i] == ',')
+                    {
+                        result[resultIndex++] = IcsDayRule.Parse(span[start..i].ToString());
+                        start = i + 1;
+                    }
                 }
 
                 return result;
@@ -1071,12 +1077,18 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                var parts = value.Split(',');
-                var result = new sbyte[parts.Length];
+                var span = value.AsSpan();
+                var result = new sbyte[CountCommaSeparatedValues(span)];
+                var resultIndex = 0;
+                var start = 0;
 
-                for (var i = 0; i < parts.Length; i++)
+                for (var i = 0; i <= span.Length; i++)
                 {
-                    result[i] = sbyte.Parse(parts[i]);
+                    if (i == span.Length || span[i] == ',')
+                    {
+                        result[resultIndex++] = sbyte.Parse(span[start..i]);
+                        start = i + 1;
+                    }
                 }
 
                 return result;
@@ -1091,12 +1103,18 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                var parts = value.Split(',');
-                var result = new short[parts.Length];
+                var span = value.AsSpan();
+                var result = new short[CountCommaSeparatedValues(span)];
+                var resultIndex = 0;
+                var start = 0;
 
-                for (var i = 0; i < parts.Length; i++)
+                for (var i = 0; i <= span.Length; i++)
                 {
-                    result[i] = short.Parse(parts[i]);
+                    if (i == span.Length || span[i] == ',')
+                    {
+                        result[resultIndex++] = short.Parse(span[start..i]);
+                        start = i + 1;
+                    }
                 }
 
                 return result;
@@ -1142,22 +1160,20 @@ namespace Enbrea.Ics
                 return default;
             }
         }
-        
+
         public static IcsTodoParticipationStatus ToTodoParticipationStatus(string value)
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "NEEDS-ACTION" => IcsTodoParticipationStatus.NeedsAction,
-                    "ACCEPTED" => IcsTodoParticipationStatus.Accepted,
-                    "DECLINED" => IcsTodoParticipationStatus.Declined,
-                    "TENTATIVE" => IcsTodoParticipationStatus.Tentative,
-                    "DELEGATED" => IcsTodoParticipationStatus.Delegated,
-                    "COMPLETED" => IcsTodoParticipationStatus.Completed,
-                    "IN-PROCESS" => IcsTodoParticipationStatus.InProcess,
-                    _ => IcsTodoParticipationStatus.Unknown
-                };
+                if (string.Equals(value, "NEEDS-ACTION", StringComparison.OrdinalIgnoreCase)) return IcsTodoParticipationStatus.NeedsAction;
+                if (string.Equals(value, "ACCEPTED", StringComparison.OrdinalIgnoreCase)) return IcsTodoParticipationStatus.Accepted;
+                if (string.Equals(value, "DECLINED", StringComparison.OrdinalIgnoreCase)) return IcsTodoParticipationStatus.Declined;
+                if (string.Equals(value, "TENTATIVE", StringComparison.OrdinalIgnoreCase)) return IcsTodoParticipationStatus.Tentative;
+                if (string.Equals(value, "DELEGATED", StringComparison.OrdinalIgnoreCase)) return IcsTodoParticipationStatus.Delegated;
+                if (string.Equals(value, "COMPLETED", StringComparison.OrdinalIgnoreCase)) return IcsTodoParticipationStatus.Completed;
+                if (string.Equals(value, "IN-PROCESS", StringComparison.OrdinalIgnoreCase)) return IcsTodoParticipationStatus.InProcess;
+
+                return IcsTodoParticipationStatus.Unknown;
             }
             else
             {
@@ -1169,14 +1185,12 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "NEEDS-ACTION" => IcsTodoStatusValue.NeedsAction,
-                    "COMPLETED" => IcsTodoStatusValue.Completed,
-                    "IN-PROCES" => IcsTodoStatusValue.InProcess,
-                    "CANCELLED" => IcsTodoStatusValue.Cancelled,
-                    _ => IcsTodoStatusValue.Unknown
-                };
+                if (string.Equals(value, "NEEDS-ACTION", StringComparison.OrdinalIgnoreCase)) return IcsTodoStatusValue.NeedsAction;
+                if (string.Equals(value, "COMPLETED", StringComparison.OrdinalIgnoreCase)) return IcsTodoStatusValue.Completed;
+                if (string.Equals(value, "IN-PROCESS", StringComparison.OrdinalIgnoreCase)) return IcsTodoStatusValue.InProcess;
+                if (string.Equals(value, "CANCELLED", StringComparison.OrdinalIgnoreCase)) return IcsTodoStatusValue.Cancelled;
+
+                return IcsTodoStatusValue.Unknown;
             }
             else
             {
@@ -1188,12 +1202,10 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "OPAQUE" => IcsTransparencyType.Opaque,
-                    "TRANSPARENT" => IcsTransparencyType.Transparent,
-                    _ => IcsTransparencyType.Unknown
-                };
+                if (string.Equals(value, "OPAQUE", StringComparison.OrdinalIgnoreCase)) return IcsTransparencyType.Opaque;
+                if (string.Equals(value, "TRANSPARENT", StringComparison.OrdinalIgnoreCase)) return IcsTransparencyType.Transparent;
+
+                return IcsTransparencyType.Unknown;
             }
             else
             {
@@ -1210,14 +1222,12 @@ namespace Enbrea.Ics
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                return value.ToUpper() switch
-                {
-                    "INDIVIDUAL" => IcsUserType.Individual,
-                    "GROUP" => IcsUserType.Group,
-                    "ROOM" => IcsUserType.Room,
-                    "RESOURCE" => IcsUserType.Resource,
-                    _ => IcsUserType.Unknown
-                };
+                if (string.Equals(value, "INDIVIDUAL", StringComparison.OrdinalIgnoreCase)) return IcsUserType.Individual;
+                if (string.Equals(value, "GROUP", StringComparison.OrdinalIgnoreCase)) return IcsUserType.Group;
+                if (string.Equals(value, "ROOM", StringComparison.OrdinalIgnoreCase)) return IcsUserType.Room;
+                if (string.Equals(value, "RESOURCE", StringComparison.OrdinalIgnoreCase)) return IcsUserType.Resource;
+
+                return IcsUserType.Unknown;
             }
             else
             {
@@ -1235,6 +1245,26 @@ namespace Enbrea.Ics
             {
                 throw new ArgumentNullException(nameof(value));
             }
+        }
+
+        private static int CountCommaSeparatedValues(ReadOnlySpan<char> value)
+        {
+            if (value.IsEmpty)
+            {
+                return 0;
+            }
+
+            var count = 1;
+
+            for (var i = 0; i < value.Length; i++)
+            {
+                if (value[i] == ',')
+                {
+                    count++;
+                }
+            }
+
+            return count;
         }
     }
 }

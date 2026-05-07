@@ -1,4 +1,4 @@
-﻿#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
+#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
 /*    
  *    ENBREA.ICS 
  *    
@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Enbrea.Ics
@@ -27,18 +28,18 @@ namespace Enbrea.Ics
         public IcsTodo()
             : base(IcsComponentNames.Todo)
         {
-            AlarmList = new List<IcsAlarm>();
-            AttachmentList = new List<IcsAttachment>();
-            AttendeeList = new List<IcsTodoAttendee>();
-            CategoriesList = new List<IcsCategories>();
-            CommentList = new List<IcsComment>();
-            ContactList = new List<IcsContact>();
-            ExceptionDateTimesList = new List<IcsExceptionDateTimes>();
-            RecurrenceDateTimesList = new List<IcsRecurrenceDateTimes>();
-            RecurrenceRuleList = new List<IcsRecurrenceRule>();
-            RelatedToList = new List<IcsRelatedTo>();
-            RequestStatusList = new List<IcsRequestStatus>();
-            ResourcesList = new List<IcsResources>();
+            AlarmList = [];
+            AttachmentList = [];
+            AttendeeList = [];
+            CategoriesList = [];
+            CommentList = [];
+            ContactList = [];
+            ExceptionDateTimesList = [];
+            RecurrenceDateTimesList = [];
+            RecurrenceRuleList = [];
+            RelatedToList = [];
+            RequestStatusList = [];
+            ResourcesList = [];
         }
 
         /// <summary>
@@ -515,7 +516,7 @@ namespace Enbrea.Ics
         /// <param name="textWriter">Text writer</param>
         public override void WriteContent(TextWriter textWriter)
         {
-            textWriter.Write(IcsCoreNames.Begin, Name);
+            textWriter.WriteContent(IcsCoreNames.Begin, Name);
 
             textWriter.WriteComponentList(AlarmList);
             textWriter.WritePropertyList(AttachmentList);
@@ -550,7 +551,7 @@ namespace Enbrea.Ics
 
             base.WriteContent(textWriter);
 
-            textWriter.Write(IcsCoreNames.End, Name);
+            textWriter.WriteContent(IcsCoreNames.End, Name);
         }
 
         /// <summary>
@@ -558,44 +559,44 @@ namespace Enbrea.Ics
         /// </summary>
         /// <param name="textWriter">Text writer</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
-        public override async Task WriteContentAsync(TextWriter textWriter)
+        public override async Task WriteContentAsync(TextWriter textWriter, CancellationToken cancellationToken = default)
         {
-            await textWriter.WriteContentAsync(IcsCoreNames.Begin, Name);
+            await textWriter.WriteContentAsync(IcsCoreNames.Begin, Name, cancellationToken).ConfigureAwait(false);
 
-            await textWriter.WriteComponentListAsync(AlarmList);
-            await textWriter.WritePropertyListAsync(AttachmentList);
-            await textWriter.WritePropertyListAsync(AttendeeList);
-            await textWriter.WritePropertyListAsync(CategoriesList);
-            await textWriter.WritePropertyListAsync(CommentList);
-            await textWriter.WritePropertyAsync(Completed);
-            await textWriter.WritePropertyListAsync(ContactList);
-            await textWriter.WritePropertyAsync(Created);
-            await textWriter.WritePropertyAsync(DateTimeStamp);
-            await textWriter.WritePropertyAsync(Description);
-            await textWriter.WritePropertyAsync(Due);
-            await textWriter.WritePropertyAsync(Duration);
-            await textWriter.WritePropertyListAsync(ExceptionDateTimesList);
-            await textWriter.WritePropertyAsync(Geo);
-            await textWriter.WritePropertyAsync(LastModified);
-            await textWriter.WritePropertyAsync(Organizer);
-            await textWriter.WritePropertyAsync(PercentComplete);
-            await textWriter.WritePropertyAsync(Priority);
-            await textWriter.WritePropertyListAsync(RecurrenceDateTimesList);
-            await textWriter.WritePropertyAsync(RecurrenceId);
-            await textWriter.WritePropertyListAsync(RecurrenceRuleList);
-            await textWriter.WritePropertyListAsync(RelatedToList);
-            await textWriter.WritePropertyListAsync(RequestStatusList);
-            await textWriter.WritePropertyListAsync(ResourcesList);
-            await textWriter.WritePropertyAsync(Sequence);
-            await textWriter.WritePropertyAsync(Start);
-            await textWriter.WritePropertyAsync(Status);
-            await textWriter.WritePropertyAsync(Summary);
-            await textWriter.WritePropertyAsync(Uid);
-            await textWriter.WritePropertyAsync(Url);
+            await textWriter.WriteComponentListAsync(AlarmList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(AttachmentList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(AttendeeList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(CategoriesList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(CommentList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Completed, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(ContactList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Created, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(DateTimeStamp, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Description, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Due, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Duration, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(ExceptionDateTimesList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Geo, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(LastModified, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Organizer, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(PercentComplete, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Priority, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(RecurrenceDateTimesList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(RecurrenceId, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(RecurrenceRuleList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(RelatedToList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(RequestStatusList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(ResourcesList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Sequence, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Start, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Status, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Summary, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Uid, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Url, cancellationToken).ConfigureAwait(false);
 
-            await base.WriteContentAsync(textWriter);
+            await base.WriteContentAsync(textWriter, cancellationToken).ConfigureAwait(false);
 
-            await textWriter.WriteContentAsync(IcsCoreNames.End, Name);
+            await textWriter.WriteContentAsync(IcsCoreNames.End, Name, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Enbrea.Ics.Tests
     public class TestIcsWriter
     {
         [Fact]
-        public async Task Support_authenticity_call_event_Example()
+        public async Task WriteAsync_WritesExpectedCalendarContent_ForAuthenticityCallEvent()
         {
             using var strWriter = new StringWriter();
             var icsWriter = new IcsWriter(strWriter);
@@ -50,14 +50,16 @@ namespace Enbrea.Ics.Tests
             icsEvent.End = new IcsDateTimeEnd(new DateTime(2018, 5, 24, 10, 30, 0));
             icsEvent.Summary = new IcsSummary("Authenticity Call");
             icsEvent.Description = new IcsDescription("You were appointed to Authenticity Call event with DigiCert, Inc. provider.");
-            icsEvent.Organizer = new IcsOrganizer("MAILTO:xyz@digicert.com");
-            icsEvent.Organizer.CommonName = "DigiCert, Inc.: DigiCert, Inc.";
+            icsEvent.Organizer = new IcsOrganizer("MAILTO:xyz@digicert.com")
+            {
+                CommonName = "DigiCert, Inc.: DigiCert, Inc."
+            };
 
             // Custom property
             icsCalendar.AddCustomProperty("X-MS-OLK-FORCEINSPECTOROPEN", "TRUE");
 
             // Write calendar object to string
-            await icsWriter.WriteAsync(icsCalendar);
+            await icsWriter.WriteAsync(icsCalendar, TestContext.Current.CancellationToken);
 
             // Convert string to array of strings
             using var strReader = new StringReader(strWriter.ToString());
@@ -65,7 +67,7 @@ namespace Enbrea.Ics.Tests
             
             while (strReader.Peek() != -1)
             {
-                strList.Add(await strReader.ReadLineAsync());
+                strList.Add(await strReader.ReadLineAsync(TestContext.Current.CancellationToken));
             }
 
             // Check

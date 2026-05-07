@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -26,63 +27,14 @@ namespace Enbrea.Ics.Tests
     public class TestIcsReader
     {
         [Fact]
-        public async Task Support_meetup_Example()
-        {
-            using var strReader = File.OpenText(Path.Combine(GetOutputFolder(), "Assets", "meetup.ics"));
-            var icsReader = new IcsReader(strReader);
-
-            Assert.NotNull(icsReader);
-
-            IAsyncEnumerator<IcsCalendar> enumerator = icsReader.ReadAsync().GetAsyncEnumerator();
-
-            // Get calendar object
-            Assert.True(await enumerator.MoveNextAsync());
-
-            // Calendar properties
-            Assert.Equal("2.0", enumerator.Current.Version.Value);
-            Assert.Equal("PUBLISH", enumerator.Current.Method.Value);
-            Assert.Equal("GREGORIAN", enumerator.Current.Scale.Value);
-            Assert.Equal("-//Meetup//RemoteApi//EN", enumerator.Current.ProductId.Value);
-            Assert.Equal("X-ORIGINAL-URL", enumerator.Current.CustomProperties[0].Name);
-            Assert.Equal("http://www.meetup.com/events/ical/8333638/dfdba2e4692160753404f737feace78d526ff0ce/going", enumerator.Current.CustomProperties[0].Value);
-
-            // Number of events
-            Assert.Single(enumerator.Current.EventList);
-
-            // Event properties
-            Assert.NotNull(enumerator.Current.EventList[0].Uid);
-            Assert.Equal("event_nsmxnyppbfc@meetup.com", enumerator.Current.EventList[0].Uid.Value);
-            Assert.Equal(new IcsGeoPosition(33.56, -111.90), enumerator.Current.EventList[0].Geo.Value);
-            Assert.Equal("Open Source Project Tempe (1415 E University Dr. #103A, Tempe, AZ 85281)", enumerator.Current.EventList[0].Location.Value);
-            Assert.Equal(new Uri("http://www.meetup.com/Phoenix-Drupal-User-Group/events/33627272/"), enumerator.Current.EventList[0].Url.Value);
-            Assert.Equal(
-                "Phoenix Drupal User Group" + Environment.NewLine +
-                "Wednesday, November 9 at 7:00 PM" + Environment.NewLine + Environment.NewLine +
-                "Customizing node display with template pages in Drupal 6" + Environment.NewLine + Environment.NewLine +
-                " Jon Sheehan and Matthew Berry of the Office of Knowledge Enterprise Development (OKED) Knowledge..." + Environment.NewLine + Environment.NewLine + 
-                "Details: http://www.meetup.com/Phoenix-Drupal-User-Group/events/33627272/", enumerator.Current.EventList[0].Description.Value);
-
-            // Number of timezones
-            Assert.Single(enumerator.Current.TimeZoneList);
-            Assert.Single(enumerator.Current.TimeZoneList[0].StandardRuleList);
-
-            // timezone properties
-            Assert.Equal("America/Phoenix", enumerator.Current.TimeZoneList[0].Id.Value);
-            Assert.Equal(new Uri("http://tzurl.org/zoneinfo-outlook/America/Phoenix"), enumerator.Current.TimeZoneList[0].Url.Value);
-            Assert.Equal("MST", enumerator.Current.TimeZoneList[0].StandardRuleList[0].NameList[0].Value);
-            Assert.Equal(new IcsUtcOffset(new TimeSpan(0, -7, 0)), enumerator.Current.TimeZoneList[0].StandardRuleList[0].OffsetFrom.Value);
-            Assert.Equal(new IcsUtcOffset(new TimeSpan(0, -7, 0)), enumerator.Current.TimeZoneList[0].StandardRuleList[0].OffsetTo.Value);
-        }
-
-        [Fact]
-        public async Task Support_authenticity_call_event_Example()
+        public async Task ReadAsync_ReturnsExpectedCalendar_ForAuthenticityCallEventExample()
         {
             using var strReader = File.OpenText(Path.Combine(GetOutputFolder(), "Assets", "authenticity_call_event.ics"));
             var icsReader = new IcsReader(strReader);
 
             Assert.NotNull(icsReader);
 
-            IAsyncEnumerator<IcsCalendar> enumerator = icsReader.ReadAsync().GetAsyncEnumerator();
+            IAsyncEnumerator<IcsCalendar> enumerator = icsReader.ReadAsync(TestContext.Current.CancellationToken).GetAsyncEnumerator(TestContext.Current.CancellationToken);
 
             // Get calendar object
             Assert.True(await enumerator.MoveNextAsync());
@@ -114,14 +66,14 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public async Task Support_event_with_alarm_Example()
+        public async Task ReadAsync_ReturnsExpectedCalendar_ForEventWithAlarmExample()
         {
             using var strReader = File.OpenText(Path.Combine(GetOutputFolder(), "Assets", "event_with_alarm.ics"));
             var icsReader = new IcsReader(strReader);
 
             Assert.NotNull(icsReader);
 
-            IAsyncEnumerator<IcsCalendar> enumerator = icsReader.ReadAsync().GetAsyncEnumerator();
+            IAsyncEnumerator<IcsCalendar> enumerator = icsReader.ReadAsync(TestContext.Current.CancellationToken).GetAsyncEnumerator(TestContext.Current.CancellationToken);
 
             // Get calendar object
             Assert.True(await enumerator.MoveNextAsync());
@@ -146,14 +98,14 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public async Task Support_holidays_Example()
+        public async Task ReadAsync_ReturnsExpectedCalendar_ForHolidaysExample()
         {
             using var strReader = File.OpenText(Path.Combine(GetOutputFolder(), "Assets", "holidays.ics"));
             var icsReader = new IcsReader(strReader);
 
             Assert.NotNull(icsReader);
 
-            IAsyncEnumerator<IcsCalendar> enumerator = icsReader.ReadAsync().GetAsyncEnumerator();
+            IAsyncEnumerator<IcsCalendar> enumerator = icsReader.ReadAsync(TestContext.Current.CancellationToken).GetAsyncEnumerator(TestContext.Current.CancellationToken);
 
             // Get calendar object
             Assert.True(await enumerator.MoveNextAsync());
@@ -216,14 +168,63 @@ namespace Enbrea.Ics.Tests
         }
 
         [Fact]
-        public async Task Support_office_2012_owa_Example()
+        public async Task ReadAsync_ReturnsExpectedCalendar_ForMeetupExample()
+        {
+            using var strReader = File.OpenText(Path.Combine(GetOutputFolder(), "Assets", "meetup.ics"));
+            var icsReader = new IcsReader(strReader);
+
+            Assert.NotNull(icsReader);
+
+            IAsyncEnumerator<IcsCalendar> enumerator = icsReader.ReadAsync(TestContext.Current.CancellationToken).GetAsyncEnumerator(TestContext.Current.CancellationToken);
+
+            // Get calendar object
+            Assert.True(await enumerator.MoveNextAsync());
+
+            // Calendar properties
+            Assert.Equal("2.0", enumerator.Current.Version.Value);
+            Assert.Equal("PUBLISH", enumerator.Current.Method.Value);
+            Assert.Equal("GREGORIAN", enumerator.Current.Scale.Value);
+            Assert.Equal("-//Meetup//RemoteApi//EN", enumerator.Current.ProductId.Value);
+            Assert.Equal("X-ORIGINAL-URL", enumerator.Current.CustomProperties[0].Name);
+            Assert.Equal("http://www.meetup.com/events/ical/8333638/dfdba2e4692160753404f737feace78d526ff0ce/going", enumerator.Current.CustomProperties[0].Value);
+
+            // Number of events
+            Assert.Single(enumerator.Current.EventList);
+
+            // Event properties
+            Assert.NotNull(enumerator.Current.EventList[0].Uid);
+            Assert.Equal("event_nsmxnyppbfc@meetup.com", enumerator.Current.EventList[0].Uid.Value);
+            Assert.Equal(new IcsGeoPosition(33.56, -111.90), enumerator.Current.EventList[0].Geo.Value);
+            Assert.Equal("Open Source Project Tempe (1415 E University Dr. #103A, Tempe, AZ 85281)", enumerator.Current.EventList[0].Location.Value);
+            Assert.Equal(new Uri("http://www.meetup.com/Phoenix-Drupal-User-Group/events/33627272/"), enumerator.Current.EventList[0].Url.Value);
+            Assert.Equal(
+                "Phoenix Drupal User Group" + Environment.NewLine +
+                "Wednesday, November 9 at 7:00 PM" + Environment.NewLine + Environment.NewLine +
+                "Customizing node display with template pages in Drupal 6" + Environment.NewLine + Environment.NewLine +
+                " Jon Sheehan and Matthew Berry of the Office of Knowledge Enterprise Development (OKED) Knowledge..." + Environment.NewLine + Environment.NewLine +
+                "Details: http://www.meetup.com/Phoenix-Drupal-User-Group/events/33627272/", enumerator.Current.EventList[0].Description.Value);
+
+            // Number of timezones
+            Assert.Single(enumerator.Current.TimeZoneList);
+            Assert.Single(enumerator.Current.TimeZoneList[0].StandardRuleList);
+
+            // timezone properties
+            Assert.Equal("America/Phoenix", enumerator.Current.TimeZoneList[0].Id.Value);
+            Assert.Equal(new Uri("http://tzurl.org/zoneinfo-outlook/America/Phoenix"), enumerator.Current.TimeZoneList[0].Url.Value);
+            Assert.Equal("MST", enumerator.Current.TimeZoneList[0].StandardRuleList[0].NameList[0].Value);
+            Assert.Equal(new IcsUtcOffset(new TimeSpan(0, -7, 0)), enumerator.Current.TimeZoneList[0].StandardRuleList[0].OffsetFrom.Value);
+            Assert.Equal(new IcsUtcOffset(new TimeSpan(0, -7, 0)), enumerator.Current.TimeZoneList[0].StandardRuleList[0].OffsetTo.Value);
+        }
+
+        [Fact]
+        public async Task ReadAsync_ReturnsExpectedCalendar_ForOffice2012OwaExample()
         {
             using var strReader = File.OpenText(Path.Combine(GetOutputFolder(), "Assets", "office_2012_owa.ics"));
             var icsReader = new IcsReader(strReader);
 
             Assert.NotNull(icsReader);
 
-            IAsyncEnumerator<IcsCalendar> enumerator = icsReader.ReadAsync().GetAsyncEnumerator();
+            IAsyncEnumerator<IcsCalendar> enumerator = icsReader.ReadAsync(TestContext.Current.CancellationToken).GetAsyncEnumerator(TestContext.Current.CancellationToken);
 
             // Get calendar object
             Assert.True(await enumerator.MoveNextAsync());
@@ -267,6 +268,23 @@ namespace Enbrea.Ics.Tests
             Assert.Equal("0", enumerator.Current.EventList[1].CustomProperties[0].Value);
         }
 
+        [Fact]
+        public async Task ReadAsync_ThrowsOperationCanceledException_WhenCancellationIsRequested()
+        {
+            using var strReader = File.OpenText(Path.Combine(GetOutputFolder(), "Assets", "holidays.ics"));
+            var icsReader = new IcsReader(strReader);
+            
+            using var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+
+            await using var enumerator = icsReader.ReadAsync(cancellationTokenSource.Token).GetAsyncEnumerator(TestContext.Current.CancellationToken);
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+            {
+                await enumerator.MoveNextAsync();
+            });
+        }
+
         private static string GetOutputFolder()
         {
             // Get the full location of the assembly
@@ -277,4 +295,3 @@ namespace Enbrea.Ics.Tests
         }
     }
 }
-

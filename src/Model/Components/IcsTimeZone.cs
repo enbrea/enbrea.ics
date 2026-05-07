@@ -1,4 +1,4 @@
-﻿#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
+#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
 /*    
  *    ENBREA.ICS 
  *    
@@ -11,6 +11,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Enbrea.Ics
@@ -26,8 +27,8 @@ namespace Enbrea.Ics
         public IcsTimeZone()
             : base(IcsComponentNames.TimeZone)
         {
-            DaylightRuleList = new List<IcsDaylightRule>();
-            StandardRuleList = new List<IcsStandardRule>();
+            DaylightRuleList = [];
+            StandardRuleList = [];
         }
 
         /// <summary>
@@ -88,7 +89,7 @@ namespace Enbrea.Ics
         /// <param name="textWriter">Text writer</param>
         public override void WriteContent(TextWriter textWriter)
         {
-            textWriter.Write(IcsCoreNames.Begin, IcsComponentNames.TimeZone);
+            textWriter.WriteContent(IcsCoreNames.Begin, IcsComponentNames.TimeZone);
 
             textWriter.WriteComponentList(DaylightRuleList);
             textWriter.WriteProperty(Id);
@@ -98,7 +99,7 @@ namespace Enbrea.Ics
 
             base.WriteContent(textWriter);
 
-            textWriter.Write(IcsCoreNames.End, IcsComponentNames.TimeZone);
+            textWriter.WriteContent(IcsCoreNames.End, IcsComponentNames.TimeZone);
         }
 
         /// <summary>
@@ -106,19 +107,19 @@ namespace Enbrea.Ics
         /// </summary>
         /// <param name="textWriter">Text writer</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
-        public override async Task WriteContentAsync(TextWriter textWriter)
+        public override async Task WriteContentAsync(TextWriter textWriter, CancellationToken cancellationToken = default)
         {
-            await textWriter.WriteContentAsync(IcsCoreNames.Begin, IcsComponentNames.TimeZone);
+            await textWriter.WriteContentAsync(IcsCoreNames.Begin, IcsComponentNames.TimeZone, cancellationToken).ConfigureAwait(false);
 
-            await textWriter.WriteComponentListAsync(DaylightRuleList);
-            await textWriter.WritePropertyAsync(Id);
-            await textWriter.WritePropertyAsync(LastModified);
-            await textWriter.WriteComponentListAsync(StandardRuleList);
-            await textWriter.WritePropertyAsync(Url);
+            await textWriter.WriteComponentListAsync(DaylightRuleList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Id, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(LastModified, cancellationToken).ConfigureAwait(false);
+            await textWriter.WriteComponentListAsync(StandardRuleList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Url, cancellationToken).ConfigureAwait(false);
 
-            await base.WriteContentAsync(textWriter);
+            await base.WriteContentAsync(textWriter, cancellationToken).ConfigureAwait(false);
 
-            await textWriter.WriteContentAsync(IcsCoreNames.End, IcsComponentNames.TimeZone);
+            await textWriter.WriteContentAsync(IcsCoreNames.End, IcsComponentNames.TimeZone, cancellationToken).ConfigureAwait(false);
         }
     }
 }

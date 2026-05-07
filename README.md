@@ -3,10 +3,10 @@
 
 # ENBREA ICS
 
-A .NET library for parsing and building [iCalendar](https://tools.ietf.org/html/rfc5545) streams and files:
+A modern .NET library for parsing and generating [iCalendar](https://datatracker.ietf.org/doc/html/rfc5545) streams and files with full RFC 5545 compliance.
 
-+ Supports .NET 10, .NET 9 and .NET 8
-+ Supports reading and writing of the following iCal components:
++ Supports `.NET 10`, `.NET 9` and `.NET 8`
++ Supports reading and writing the following iCalendar components:
   + VCALENDAR
   + VEVENT
   + VTODO
@@ -16,11 +16,11 @@ A .NET library for parsing and building [iCalendar](https://tools.ietf.org/html/
   + VALARM
   + STANDARD
   + DAYLIGHT
-+ Supports reading and writing of custom properties and parameters
-+ Includes low level iCalendar content line parser
-+ Includes low level iCalendar duration parser
-+ Includes high level iCalendar object reader and writer 
-+ Includes synchron and asynchron methods
++ Supports custom properties and parameters
++ Includes a low-level iCalendar content-line parser
++ Includes a low-level iCalendar duration parser
++ Includes high-level iCalendar object reader and writer
++ Provides both synchronous and asynchronous APIs
 
 ## Installation
 
@@ -32,13 +32,6 @@ dotnet add package Enbrea.Ics
 
 Documentation is available in the [GitHub wiki](https://github.com/enbrea/enbrea.ics/wiki).
 
-## Todo
+## Contributing
 
-- [ ] Adding more unit tests
-- [ ] Adding support for [RFC 7986: New Properties for iCalendar](https://datatracker.ietf.org/doc/html/rfc7986)
-- [ ] Adding support for [RFC 9073: Event Publishing Extensions to iCalendar](https://datatracker.ietf.org/doc/html/rfc9073)
-- [ ] Adding support for [RFC 9074: "VALARM" Extensions for iCalendar](https://datatracker.ietf.org/doc/html/rfc9074)
-
-## Can I help?
-
-Yes, that would be much appreciated. The best way to help is to post a response via the Issue Tracker and/or submit a Pull Request.
+Yes, contributions are very welcome. The best way to help is to open an issue and/or submit a pull request.

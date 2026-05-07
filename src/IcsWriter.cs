@@ -1,4 +1,4 @@
-﻿#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
+#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
 /*    
  *    ENBREA.ICS 
  *    
@@ -10,6 +10,7 @@
 #endregion
 
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Enbrea.Ics
@@ -19,7 +20,7 @@ namespace Enbrea.Ics
     /// </summary>
     public class IcsWriter
     {
-        private TextWriter _textWriter;
+        private readonly TextWriter _textWriter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IcsWriter"/> class.
@@ -44,9 +45,9 @@ namespace Enbrea.Ics
         /// </summary>
         /// <param name="calendar">The iCalender instance</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
-        public async Task WriteAsync(IcsCalendar calendar)
+        public Task WriteAsync(IcsCalendar calendar, CancellationToken cancellationToken = default)
         {
-            await calendar.WriteContentAsync(_textWriter);
+            return calendar.WriteContentAsync(_textWriter, cancellationToken);
         }
     }
 }

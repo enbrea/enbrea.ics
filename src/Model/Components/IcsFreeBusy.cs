@@ -1,4 +1,4 @@
-﻿#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
+#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
 /*    
  *    ENBREA.ICS 
  *    
@@ -11,6 +11,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Enbrea.Ics
@@ -26,10 +27,10 @@ namespace Enbrea.Ics
         public IcsFreeBusy()
             : base(IcsComponentNames.FreeBusy)
         {
-            AttendeeList = new List<IcsAttendee>();
-            CommentList = new List<IcsComment>();
-            FreeBusyTimeList = new List<IcsFreeBusyTime>();
-            RequestStatusList = new List<IcsRequestStatus>();
+            AttendeeList = [];
+            CommentList = [];
+            FreeBusyTimeList = [];
+            RequestStatusList = [];
         }
 
         /// <summary>
@@ -189,7 +190,7 @@ namespace Enbrea.Ics
         /// <param name="textWriter">Text writer</param>
         public override void WriteContent(TextWriter textWriter)
         {
-            textWriter.Write(IcsCoreNames.Begin, IcsComponentNames.FreeBusy);
+            textWriter.WriteContent(IcsCoreNames.Begin, IcsComponentNames.FreeBusy);
 
             textWriter.WritePropertyList(AttendeeList);
             textWriter.WritePropertyList(CommentList);
@@ -205,7 +206,7 @@ namespace Enbrea.Ics
 
             base.WriteContent(textWriter);
 
-            textWriter.Write(IcsCoreNames.End, IcsComponentNames.FreeBusy);
+            textWriter.WriteContent(IcsCoreNames.End, IcsComponentNames.FreeBusy);
         }
 
         /// <summary>
@@ -213,25 +214,25 @@ namespace Enbrea.Ics
         /// </summary>
         /// <param name="textWriter">Text writer</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
-        public override async Task WriteContentAsync(TextWriter textWriter)
+        public override async Task WriteContentAsync(TextWriter textWriter, CancellationToken cancellationToken = default)
         {
-            await textWriter.WriteContentAsync(IcsCoreNames.Begin, IcsComponentNames.FreeBusy);
+            await textWriter.WriteContentAsync(IcsCoreNames.Begin, IcsComponentNames.FreeBusy, cancellationToken).ConfigureAwait(false);
 
-            await textWriter.WritePropertyListAsync(AttendeeList);
-            await textWriter.WritePropertyListAsync(CommentList);
-            await textWriter.WritePropertyAsync(Contact);
-            await textWriter.WritePropertyAsync(DateTimeStamp);
-            await textWriter.WritePropertyAsync(End);
-            await textWriter.WritePropertyListAsync(FreeBusyTimeList);
-            await textWriter.WritePropertyAsync(Organizer);
-            await textWriter.WritePropertyListAsync(RequestStatusList);
-            await textWriter.WritePropertyAsync(Start);
-            await textWriter.WritePropertyAsync(Uid);
-            await textWriter.WritePropertyAsync(Url);
+            await textWriter.WritePropertyListAsync(AttendeeList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(CommentList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Contact, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(DateTimeStamp, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(End, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(FreeBusyTimeList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Organizer, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(RequestStatusList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Start, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Uid, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Url, cancellationToken).ConfigureAwait(false);
 
-            await base.WriteContentAsync(textWriter);
+            await base.WriteContentAsync(textWriter, cancellationToken).ConfigureAwait(false);
 
-            await textWriter.WriteContentAsync(IcsCoreNames.End, IcsComponentNames.FreeBusy);
+            await textWriter.WriteContentAsync(IcsCoreNames.End, IcsComponentNames.FreeBusy, cancellationToken).ConfigureAwait(false);
         }
 
     }

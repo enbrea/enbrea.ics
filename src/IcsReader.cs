@@ -1,4 +1,4 @@
-﻿#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
+#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
 /*    
  *    ENBREA.ICS 
  *    
@@ -9,8 +9,12 @@
  */
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Enbrea.Ics
 {
@@ -52,9 +56,9 @@ namespace Enbrea.Ics
         /// Reads all iCalendar objects out of the stream and gives back an enumerator. 
         /// </summary>
         /// <returns>An async enumerator of iCalendar objects.</returns>
-        public async IAsyncEnumerable<IcsCalendar> ReadAsync()
+        public async IAsyncEnumerable<IcsCalendar> ReadAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            await foreach (var contentLine in _icsParser.ReadAsync())
+            await foreach (var contentLine in _icsParser.ReadAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (ConsumeContentLine(contentLine))
                 {
@@ -65,10 +69,10 @@ namespace Enbrea.Ics
         }
 
         /// <summary>
-        /// Consumes a freshly parsed content line to build the current iCalendar object.
+        /// Consumes a freshly parsed content-line to build the current iCalendar object.
         /// </summary>
-        /// <param name="contentLine">The conten line</param>
-        /// <returns>True if this was the last content line of the iCalendar object.</returns>
+        /// <param name="contentLine">The content-line</param>
+        /// <returns>True if this was the last content-line of the iCalendar object.</returns>
         private bool ConsumeContentLine(IcsContentLine contentLine)
         {
             if (_icsCalendarBuilder != null)

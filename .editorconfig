@@ -2,3 +2,12 @@
 
 # IDE0130: Namespace does not match folder structure
 dotnet_style_namespace_match_folder = false
+
+# IDE0290: Use primary constructor
+dotnet_diagnostic.IDE0290.severity = none
+
+# CA1859: Use concrete types when possible for improved performance
+dotnet_diagnostic.CA1859.severity = none
+
+# IDE0060: Remove unused parameter
+dotnet_diagnostic.IDE0060.severity = none

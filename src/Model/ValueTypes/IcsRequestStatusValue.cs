@@ -100,7 +100,7 @@ namespace Enbrea.Ics
         /// <returns>
         /// True if the value parameter equals the value of this instance; otherwise, false.
         /// </returns>
-        public bool Equals(IcsRequestStatusValue other)
+        public readonly bool Equals(IcsRequestStatusValue other)
         {
             return Code.Equals(other.Code) && Description.Equals(other.Description) && ExtraData.Equals(other.ExtraData);
         }
@@ -113,7 +113,7 @@ namespace Enbrea.Ics
         /// True if value is an instance of <see cref="IcsRequestStatusValue"/> and equals the value 
         /// of this instance; otherwise, false.
         /// </returns>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is IcsRequestStatusValue other && Equals(other);
         }
@@ -122,7 +122,7 @@ namespace Enbrea.Ics
         /// Returns the hash code for this instance.
         /// </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(Code, Description, ExtraData);
         }
@@ -132,7 +132,7 @@ namespace Enbrea.Ics
         /// equivalent string representation.
         /// </summary>
         /// <returns>A string that contains the string representation.</returns>        
-        public override string ToString()
+        public override readonly string ToString()
         {
             return string.Join(';', Code, Description, ExtraData);
         }

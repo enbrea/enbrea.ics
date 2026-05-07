@@ -1,4 +1,4 @@
-﻿#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
+#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
 /*    
  *    ENBREA.ICS 
  *    
@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Enbrea.Ics
@@ -27,8 +28,8 @@ namespace Enbrea.Ics
         public IcsAlarm()
             : base(IcsComponentNames.Alarm)
         {
-            AttachmentList = new List<IcsAttachment>();
-            AttendeeList = new List<IcsAttendee>();
+            AttachmentList = [];
+            AttendeeList = [];
         }
 
         /// <summary>
@@ -137,7 +138,7 @@ namespace Enbrea.Ics
         /// <param name="textWriter">Text writer</param>
         public override void WriteContent(TextWriter textWriter)
         {
-            textWriter.Write(IcsCoreNames.Begin, IcsComponentNames.Alarm);
+            textWriter.WriteContent(IcsCoreNames.Begin, IcsComponentNames.Alarm);
 
             textWriter.WriteProperty(Action);
             textWriter.WritePropertyList(AttachmentList);
@@ -150,7 +151,7 @@ namespace Enbrea.Ics
 
             base.WriteContent(textWriter);
 
-            textWriter.Write(IcsCoreNames.End, IcsComponentNames.Alarm);
+            textWriter.WriteContent(IcsCoreNames.End, IcsComponentNames.Alarm);
         }
 
         /// <summary>
@@ -158,22 +159,22 @@ namespace Enbrea.Ics
         /// </summary>
         /// <param name="textWriter">Text writer</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
-        public override async Task WriteContentAsync(TextWriter textWriter)
+        public override async Task WriteContentAsync(TextWriter textWriter, CancellationToken cancellationToken = default)
         {
-            await textWriter.WriteContentAsync(IcsCoreNames.Begin, IcsComponentNames.Alarm);
+            await textWriter.WriteContentAsync(IcsCoreNames.Begin, IcsComponentNames.Alarm, cancellationToken).ConfigureAwait(false);
 
-            await textWriter.WritePropertyAsync(Action);
-            await textWriter.WritePropertyListAsync(AttachmentList);
-            await textWriter.WritePropertyListAsync(AttendeeList);
-            await textWriter.WritePropertyAsync(Description);
-            await textWriter.WritePropertyAsync(Duration);
-            await textWriter.WritePropertyAsync(Repeat);
-            await textWriter.WritePropertyAsync(Summary);
-            await textWriter.WritePropertyAsync(Trigger);
+            await textWriter.WritePropertyAsync(Action, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(AttachmentList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(AttendeeList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Description, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Duration, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Repeat, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Summary, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Trigger, cancellationToken).ConfigureAwait(false);
 
-            await base.WriteContentAsync(textWriter);
+            await base.WriteContentAsync(textWriter, cancellationToken).ConfigureAwait(false);
 
-            await textWriter.WriteContentAsync(IcsCoreNames.End, IcsComponentNames.Alarm);
+            await textWriter.WriteContentAsync(IcsCoreNames.End, IcsComponentNames.Alarm, cancellationToken).ConfigureAwait(false);
         }
     }
 }

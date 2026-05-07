@@ -1,4 +1,4 @@
-﻿#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
+#region ENBREA.ICS - Copyright (C) STÜBER SYSTEMS GmbH
 /*    
  *    ENBREA.ICS 
  *    
@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Enbrea.Ics
@@ -28,9 +29,9 @@ namespace Enbrea.Ics
         public IcsTimeZoneRule(string name)
             : base(name)
         {
-            CommentList = new List<IcsComment>();
-            RecurrenceDateTimesList = new List<IcsRecurrenceDateTimes>();
-            NameList = new List<IcsTimeZoneName>();
+            CommentList = [];
+            RecurrenceDateTimesList = [];
+            NameList = [];
         }
 
         /// <summary>
@@ -169,7 +170,7 @@ namespace Enbrea.Ics
         /// <param name="textWriter">Text writer</param>
         public override void WriteContent(TextWriter textWriter)
         {
-            textWriter.Write(IcsCoreNames.Begin, Name);
+            textWriter.WriteContent(IcsCoreNames.Begin, Name);
 
             textWriter.WritePropertyList(CommentList);
             textWriter.WriteProperty(OffsetFrom);
@@ -181,7 +182,7 @@ namespace Enbrea.Ics
 
             base.WriteContent(textWriter);
 
-            textWriter.Write(IcsCoreNames.End, Name);
+            textWriter.WriteContent(IcsCoreNames.End, Name);
         }
 
         /// <summary>
@@ -189,21 +190,21 @@ namespace Enbrea.Ics
         /// </summary>
         /// <param name="textWriter">Text writer</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
-        public override async Task WriteContentAsync(TextWriter textWriter)
+        public override async Task WriteContentAsync(TextWriter textWriter, CancellationToken cancellationToken = default)
         {
-            await textWriter.WriteContentAsync(IcsCoreNames.Begin, Name);
+            await textWriter.WriteContentAsync(IcsCoreNames.Begin, Name, cancellationToken).ConfigureAwait(false);
 
-            await textWriter.WritePropertyListAsync(CommentList);
-            await textWriter.WritePropertyAsync(OffsetFrom);
-            await textWriter.WritePropertyAsync(OffsetTo);
-            await textWriter.WritePropertyListAsync(RecurrenceDateTimesList);
-            await textWriter.WritePropertyAsync(RecurrenceRule);
-            await textWriter.WritePropertyAsync(Start);
-            await textWriter.WritePropertyListAsync(NameList);
+            await textWriter.WritePropertyListAsync(CommentList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(OffsetFrom, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(OffsetTo, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(RecurrenceDateTimesList, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(RecurrenceRule, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyAsync(Start, cancellationToken).ConfigureAwait(false);
+            await textWriter.WritePropertyListAsync(NameList, cancellationToken).ConfigureAwait(false);
 
-            await base.WriteContentAsync(textWriter);
+            await base.WriteContentAsync(textWriter, cancellationToken).ConfigureAwait(false);
 
-            await textWriter.WriteContentAsync(IcsCoreNames.End, Name);
+            await textWriter.WriteContentAsync(IcsCoreNames.End, Name, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -91,7 +91,7 @@ namespace Enbrea.Ics
 
             if (parts.Length == 2)
             {
-                if (parts[1].StartsWith("+P") || parts[1].StartsWith("P"))
+                if (parts[1].StartsWith("+P") || parts[1].StartsWith('P'))
                 {
                     return new IcsPeriod(
                         IcsConverter.ToDateTime(parts[0]),
@@ -118,7 +118,7 @@ namespace Enbrea.Ics
         /// <returns>
         /// True if the value parameter equals the value of this instance; otherwise, false.
         /// </returns>
-        public bool Equals(IcsPeriod other)
+        public readonly bool Equals(IcsPeriod other)
         {
             return StartDateTime.Equals(other.StartDateTime) && EndDateTime.Equals(other.EndDateTime);
         }
@@ -131,7 +131,7 @@ namespace Enbrea.Ics
         /// True if value is an instance of <see cref="IcsPeriod"/> and equals the value 
         /// of this instance; otherwise, false.
         /// </returns>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is IcsPeriod other && Equals(other);
         }
@@ -140,7 +140,7 @@ namespace Enbrea.Ics
         /// Returns the hash code for this instance.
         /// </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(StartDateTime, EndDateTime, Duration);
         }
@@ -149,7 +149,7 @@ namespace Enbrea.Ics
         /// Has a duration value?
         /// </summary>
         /// <returns>TRUE if duration value exists; otherwise, FALSE.</returns>
-        public bool HasDuration()
+        public readonly bool HasDuration()
         {
             return Duration != null;
         }
@@ -158,7 +158,7 @@ namespace Enbrea.Ics
         /// Has an end DATE-TIME value?
         /// </summary>
         /// <returns>TRUE if DATE-TIME value exists; otherwise, FALSE.</returns>
-        public bool HasEndDateTime()
+        public readonly bool HasEndDateTime()
         {
             return EndDateTime != null;
         }
@@ -168,7 +168,7 @@ namespace Enbrea.Ics
         /// equivalent string representation.
         /// </summary>
         /// <returns>A string that contains the string representation.</returns>        
-        public override string ToString()
+        public override readonly string ToString()
         {
             if (HasEndDateTime())
             {

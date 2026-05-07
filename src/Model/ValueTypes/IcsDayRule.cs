@@ -91,7 +91,7 @@ namespace Enbrea.Ics
                 {
                     return new IcsDayRule(
                         IcsConverter.ToDayOfWeek(value.Substring(value.Length - 2, 2)),
-                        sbyte.Parse(value.Substring(0, value.Length - 2)));
+                        sbyte.Parse(value[..^2]));
                 }
                 else 
                 {
@@ -112,7 +112,7 @@ namespace Enbrea.Ics
         /// <returns>
         /// True if the value parameter equals the value of this instance; otherwise, false.
         /// </returns>
-        public bool Equals(IcsDayRule other)
+        public readonly bool Equals(IcsDayRule other)
         {
             return DayOfWeek.Equals(other.DayOfWeek) && Occurrence.Equals(other.Occurrence);
         }
@@ -125,7 +125,7 @@ namespace Enbrea.Ics
         /// True if value is an instance of <see cref="IcsDayRule"/> and equals the value 
         /// of this instance; otherwise, false.
         /// </returns>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is IcsDayRule other && Equals(other);
         }
@@ -134,7 +134,7 @@ namespace Enbrea.Ics
         /// Returns the hash code for this instance.
         /// </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(DayOfWeek, Occurrence);
         }
@@ -144,7 +144,7 @@ namespace Enbrea.Ics
         /// equivalent string representation.
         /// </summary>
         /// <returns>A string that contains the string representation.</returns>        
-        public override string ToString()
+        public override readonly string ToString()
         {
             var sb = new StringBuilder();
 
